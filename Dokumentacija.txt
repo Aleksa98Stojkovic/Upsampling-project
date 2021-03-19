@@ -1,0 +1,64 @@
+Instrukcije za korišćene python skripti EDSR i Preprocessing
+
+Da biste koristili bilo sta iz tih skripti treba da u svojoj python skripti ukljucite te dve skripte,
+npr. import Preprocessing. Nakon toga se metodama ili klasama usred tih skripti pristupa na sledeće način:
+Preprocessing.Load_Image(path)
+
+EDSR:
+1. model = EDSR.EDSR(batch, num_filters, num_res_block, res_block_scaling,
+					use_bias, separable_conv, scale, input_shape)
+					
+Ovim sam prvo pristupio skripti EDSR, a posle i klasi koja se isto zove, to jest ovo je kontruktor te klase sa parametrima.
+On vam realizuje model sa specificiranim brojem slojeva, brojem izlaznih kanala filtra itd.
+
+batch - koliki ce biti batch pri treniranju
+num_filters - koliko ce izlaznih kanala da bude posle svakog res bloka
+num_res_block - koliko ce res blokova da bude
+res_block_scaling - skaliranje za res blokove(staviti na None, posto se ne koristi uglavnom za male modele kao sto ce biti nas)
+use_bias - da li hocete da koristite bias ili ne(to je True ili False)
+separable_conv - da li koristite depth separable konvolucione slojeve ili ne(isto True ili False). Oni znacajno manje parametara imaju sto mozete proveriti
+				 posle sa model.summary() gde ce ispisati u konzoli koliko ima parametara
+scale - ovo definise koiki je upscale(moze biti 2, 3 ili 4)
+input_shape - kojeg je oblika ulazna slika, npr tuple([32, 32]), mora biti tipa tuple
+
+2.  model.train(train_data, train_target, epochs, steps_per_epoch, val_split, boundries, values)
+Ovim se zapocinje treniranje
+
+train_data - podaci za treniranje u formatu numpy niza sa 4 dimenzije(prva za broj slika u tom skupu, druga za sirinu, treca za visinu slike i poslednja za broj kanala)
+train_target - isto ko za train_data, samo sto su ovo slike koje zelimo da dobijemo
+epochs - broj epoha za treniranje
+steps_per_epoch - broj koraka po epohi
+boundries - koristi se za jedan planer za treniranje gd namestas kako se menja leraning rate sa brojem koraka
+values - vrednosti tog planera za date korake
+
+primer za boundries i values:
+boundries = [100, 200]
+values = [1e-5, 1e-6, 1e-7]
+
+ovo znaci da se izmedju 1 i 100 koraka korisit learning rate 1e-5, od 100 do 200 1e-6, a do kraja 1e-7
+
+3. model.create_dir(path)
+
+Ovim stvaramo datoteku na datoj putanji
+
+4. model.save_model(folder)
+
+Ovako cuvamo model posle treniranja u folder koji je prosledjen
+folder - putanja foldera
+
+5. model.shuffle(data, target)
+
+Ovo vrsi mesanje parova ulaznih slika i krajnjih slika pre treniranja
+data - ulazne slike
+target - krajnje slike
+
+6. model.display_image(image, row, col)
+
+Prikazuje grupu slika
+image - grupa slika koja se prikazuje. Ocekuje se da se prosledi 4D numpy niz(prva dimenzija je broj slika, druga sirina, treca visina, a poslednja broj kanala)
+row - borj redova na figure
+col - broj kolona na figure
+
+Znaci ako hocu da prikazem 4 slike, onda je npr. col = 2, row = 2 ili col = 1, row = 4
+
+

@@ -1,0 +1,20 @@
+Redosled izrade projekta:
+
+1.
+Treniranje sopstevene mreže
+
+Isprobavanje postojeće mreže na DIV2K datasetu,
+prunovanje mreže pomoću nekog algoritma i ponovna provera,
+ispitivanje raspodele težina za onu varijantu sa specifičnim kvantizacijom
+
+2.
+Implementacija dela akceleraciju u C jeziku,
+Optimizacije za RT modelovanje
+
+3.
+RT modelovanje kako bi se dobila arhitektura
+
+4.
+Implemetacija u VHDL-u arhitekture i jednostavna verifikacija
+
+SysytemC modelovanje i kosimulacija
