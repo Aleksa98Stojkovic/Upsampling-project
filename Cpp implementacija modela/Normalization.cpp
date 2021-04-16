@@ -1,6 +1,8 @@
 #include "Normalization.h"
 
-void Normalize(vector<vector<vector<float>>> &IFM)
+using namespace std;
+
+void Normalize(float3D &IFM)
 {
     for(int wi = 0; wi < (int)IFM.size(); wi++)
     {
@@ -14,7 +16,7 @@ void Normalize(vector<vector<vector<float>>> &IFM)
     }
 }
 
-void Denormalize(vector<vector<vector<float>>> &IFM)
+void Denormalize(float3D &IFM)
 {
     for(int wi = 0; wi < (int)IFM.size(); wi++)
     {

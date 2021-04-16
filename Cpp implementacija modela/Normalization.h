@@ -1,14 +1,11 @@
 #ifndef NORMALIZATION_H_INCLUDED
 #define NORMALIZATION_H_INCLUDED
 
-#include <iostream>
-#include <vector>
+#include "common.h"
 
-using namespace std;
+const std :: vector <t> mean = {114.44399999999999, 111.4605, 103.02000000000001};
 
-const vector <float> mean = {114.44399999999999, 111.4605, 103.02000000000001};
-
-void Normalize(vector<vector<vector<float>>> &IFM);
-void Denormalize(vector<vector<vector<float>>> &IFM);
+void Normalize(float3D &IFM);
+void Denormalize(float3D &IFM);
 
 #endif // NORMALIZATION_H_INCLUDED

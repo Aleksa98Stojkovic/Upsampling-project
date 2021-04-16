@@ -1,11 +1,9 @@
 #ifndef CONV2D_H_INCLUDED
 #define CONV2D_H_INCLUDED
 
-#include <vector>
-#include <iostream>
+#include "common.h"
 
-using namespace std;
-
-void Conv2D(const vector<vector<vector<vector<float>>>> &W, const vector<vector<vector<float>>> &IFM, vector<vector<vector<float>>> &OFM);
+void Conv2D(const float4D &W, float3D &IFM, std :: vector <t> &b, bool use_bias);
+void ReLu(float3D &IFM);
 
 #endif // CONV2D_H_INCLUDED

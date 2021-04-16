@@ -1,249 +1,170 @@
-#include <iostream>
-#include <cstdlib>
-#include <ctime>
-#include <sstream>
-#include <string>
-#include <vector>
-#include <fstream>
+#include "Add.h"
+#include "Conv2D.h"
+#include "load_store.h"
+#include "Normalization.h"
+#include "Pixel_Shuffle.h"
+#include <stack>
 
-using namespace std;
-
-// Srednje vrednosti dataseta po kanalu slike
-const vector <float> mean = {114.44399999999999, 111.4605, 103.02000000000001};
-
-// Upisivanje rezultata
-void WriteFile(string path, const vector <vector <vector <float>>> &OFM)
+typedef struct layer_block
 {
-    string str;
-    ofstream file;
-    file.open(path, ios_base :: app);
-    for(int x = 0; x < (int)OFM.size(); x++)
-    {
-        for(int y = 0; y < (int)OFM[0].size(); y++)
-        {
-            for(int c = 0; c < (int)OFM[0][0].size(); c++)
-            {
-                str = to_string(OFM[x][y][c]);
-                file << str << ",";
-            }
-        }
-    }
-    file.close();
-}
+    int layer_id;
+    int x;
+    int y;
+    int c;
+    bool save;
+    std :: string path;
+    std :: string bias_path;
 
-// Ucitavanje tezina
-// Fajl je sledeceg formata: Za svaki filtar stapic imamo jednu lniju
-// Unutar linije imamo zaredjano 64 kernela, pri cemu je forma vidljiva na primeru
-// [[1, 2, 3],  ovaj kernel ce se ispraviti u 1D niz 1,2,3,4,5,6,7,8,9
-//  [4, 5, 6],
-//  [7, 8, 9]]
-// Ako je sledeci kernel unutar tog filter stapica bio
-// [[3, 4, 1], onda se on spaja na prethodni, pa se u liniji nalazi 1,2,3,4,5,6,7,8,9,3,4,1,5,1,45,32,12,2
-//  [5, 1, 45],
-//  [32, 12, 2]]
-void LoadFile(string path, vector < vector < vector < vector <float>>>> &W)
+} layer_block;
+
+// Funkcija za ucitavanje opisa modela
+void LoadModelDescription(std :: string path, std :: vector <layer_block> &desc)
 {
-    ifstream file(path);
-    vector <float> numbers;
-    string line;
-    int n = 0;
+    std :: ifstream file;
+    std :: string line;
+    std :: vector <std :: string> line_seg;
+    layer_block lb;
 
+    file.open(path);
     while(getline(file, line))
     {
-        stringstream sline(line);
-        n = 0;
+        std :: stringstream sline(line);
+
         while(sline.good())
         {
-            string str;
-            getline(sline, str, ',');
-            if(numbers.size() < W.size() * W[0].size() * W[0][0].size())
-                numbers.push_back(stof(str));
+            std :: string str;
+            std :: getline(sline, str, ',');
+            line_seg.push_back(str);
         }
 
-        for(int d = 0; d < (int)(W[0][0][0].size()); d++)
-        {
-            for(int x = 0; x < (int)(W[0].size()); x++)
-            {
-                for(int y = 0; y < (int)(W[0][0].size()); y++)
-                {
-                    W[n][x][y][d] = numbers[0];
-                    numbers.erase(numbers.begin());
-                }
-            }
-        }
-        n++;
+        // linija ima formu: tip, x, y, c, da li sacuvati izlaz
+        lb.layer_id = stoi(line_seg[0]);
+        lb.x = stoi(line_seg[1]);
+        lb.y = stoi(line_seg[2]);
+        lb.c = stoi(line_seg[3]);
+        lb.path = line_seg[5];
+        lb.bias_path = line_seg[6];
+        if(line_seg[4] == "True")
+            lb.save = true;
+        else
+            lb.save = false;
+
+        line_seg.clear();
+        desc.push_back(lb);
     }
     file.close();
 }
-
-// Konvolucija
-void Conv2D(const vector<vector<vector<vector<float>>>> &W, const vector<vector<vector<float>>> &IFM, vector<vector<vector<float>>> &OFM)
-{
-    vector<vector<vector<float>>> IFM_new(IFM.size() + 2 , vector< vector<float>> (IFM[0].size() + 2, vector <float> (IFM[0][0].size())));
-
-    // Inicijalizacija OFM
-    for(int ci = 0; ci < (int)OFM[0][0].size(); ci++)
-    {
-        for(int x = 0; x < (int)OFM.size(); x++)
-        {
-            for(int y = 0; y < (int)OFM[0].size(); y++)
-            {
-                OFM[x][y][ci] = 0;
-            }
-        }
-    }
-
-    // dodavanje nula oko IFM[height][width][channel]
-    for(int c = 0; c < (int)IFM_new[0][0].size(); c++) // 0 - 63
-    {
-        for(int x = 0; x < (int)(IFM_new.size()); x++) // 0 - 119
-        {
-            for(int y = 0; y < (int)(IFM_new[0].size()); y++) // 0 - 125
-            {
-                // ako je w = 124 i h = 118, onda gledam da li se nalazim na pikselu sa kordinatama
-                // x pripada [1, 122] i y pripada [1, 116]
-                if((x > 0) && (x < ((int)(IFM_new.size()) - 1)) && (y > 0) && (y < ((int)(IFM_new[0].size()) - 1)))
-                    IFM_new[x][y][c] = IFM[x - 1][y - 1][c];
-                else
-                    IFM_new[x][y][c] = 0;
-            }
-        }
-    }
-
-    for(int kd = 0; kd < (int)W[0][0][0].size(); kd++) // Odaberi ulazni kanal
-    {
-        for(int x = 1; x < (int)IFM_new.size() - 1; x++) // setam se izmedju 1 i 118(max 0 do 119)
-        {
-            for(int y = 1; y < (int)IFM_new[0].size() - 1; y++) // setam se izmedju 1 i 124(max 0 do 125)
-            {
-                for(int kn = 0; kn < (int)W.size(); kn++) // stema se kroz svaki filter stapic 3x3x64
-                {
-                    for(int kh = 0; kh < (int)W[0].size(); kh++) // prodji kroz svaku vrstu 3x3 kernela
-                    {
-                        for(int kw = 0; kw < (int)W[0][0].size(); kw++) // prodji kroz svaku kolonu 3x3 kernela
-                        {
-                            OFM[x - 1][y - 1][kn] += IFM_new[x - 1 + kh][y - 1 + kw][kd] * W[kn][kh][kw][kd];
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-/*
-// Normalizacija podataka
-void Normalize(vector<vector<vector<float>>> &IFM)
-{
-    for(int wi = 0; wi < (int)IFM.size(); wi++)
-    {
-        for(int hi = 0; hi < (int)IFM[0].size(); hi++)
-        {
-            for(int ci = 0; ci < (int)IFM[0][0].size(); ci++)
-            {
-                IFM[wi][hi][ci] = (IFM[wi][hi][ci] - mean[ci]) / 127.5;
-            }
-        }
-    }
-}
-
-// Denormalizacija podataka
-void Denormalize(vector<vector<vector<float>>> &IFM)
-{
-    for(int wi = 0; wi < (int)IFM.size(); wi++)
-    {
-        for(int hi = 0; hi < (int)IFM[0].size(); hi++)
-        {
-            for(int ci = 0; ci < (int)IFM[0][0].size(); ci++)
-            {
-                IFM[wi][hi][ci] = 127.5 * IFM[wi][hi][ci] + mean[ci];
-            }
-        }
-    }
-}
-
-// Sabiranje
-void Add(vector<vector<vector<float>>> &IFM1, const vector<vector<vector<float>>> &IFM2)
-{
-    for(int wi = 0; wi < (int)IFM1.size(); wi++)
-    {
-        for(int hi = 0; hi < (int)IFM1[0].size(); hi++)
-        {
-            for(int ci = 0; ci < (int)IFM1[0][0].size(); ci++)
-            {
-                IFM1[wi][hi][ci] += IFM2[wi][hi][ci];
-            }
-        }
-    }
-}
-*/
 
 // Glavna funkcija
 int main()
 {
 
-    int kn, kd, kw, kh, w, h, c;
+    std :: vector <layer_block> desc;
+    std :: stack <float3D> output_stack;
+    int counter = 0;
+    bool use_bias = false;
 
-    w = 124;
-    h = 118;
-    c = 64;
-    kw = kh = 3;
-    kd = 64;
-    kn = 64;
+    LoadModelDescription("model_desc.txt", desc);// Ucitavanje opisa modela
+    std :: cout << "Ucitan opis modela" << std :: endl;
 
-    vector < vector < vector <float>>> IFM(h, vector <vector <float>> (w, vector <float> (c)));
-    vector < vector < vector <float>>> OFM(h, vector <vector <float>> (w, vector <float> (c)));
-    vector < vector < vector < vector <float>>>> W(kn, vector<vector<vector<float>>>(kh, vector<vector<float>>(kw, vector<float>(kd))));
+    float3D IFM(desc[0].x, std :: vector <std :: vector <t>> (desc[0].y, std :: vector <t> (desc[0].c)));
 
-    /*
-    // inicijalizacija IFM sa nekim slucajnim vrednostima
-    for(int x = 0; x < (int)IFM.size(); x++)
+    LoadInput(desc[0].path, IFM); // Ucitaj ulaz
+    std :: cout << "Ucitan je ulaz iz datoteke " << desc[0].path << std :: endl;
+    desc.erase(desc.begin());
+
+
+    // prikaz opisa svakog sloja
+    for(int i = 0; i < (int)desc.size(); i++)
     {
-        for(int y = 0; y < (int)IFM[0].size(); y++)
+        std :: cout << desc[i].layer_id << " ";
+        std :: cout << desc[i].x << " ";
+        std :: cout << desc[i].y << " ";
+        std :: cout << desc[i].c << " ";
+        std :: cout << desc[i].save << " ";
+        std :: cout << desc[i].path << " ";
+        std :: cout << desc[i].bias_path << " ";
+        std :: cout << std :: endl;
+    }
+
+    std :: cout << std :: endl << std :: endl;
+
+    // izvrsavanje modela
+    for(int i = 0; i < (int)desc.size(); i++)
+    {
+        // Samo Pixel_Shuffle i Conv2D menjaju dimenzije ulaza
+        switch(desc[i].layer_id)
         {
-            for(int z = 0; z < (int)IFM[0][0].size(); z++)
-            {
-                IFM[x][y][z] = (float)rand() / 100.0;
-            }
-        }
-    }
-    */
+            case 4:
 
-    ifstream file;
-    vector <float> numbers;
-    file.open("test_input.txt");
-    string line;
-    getline(file, line);
-    stringstream sline(line);
-    while(sline.good())
-    {
-        string str;
-        getline(sline, str, ',');
-        if(numbers.size() < IFM.size() * IFM[0].size() * IFM[0][0].size())
-            numbers.push_back(stof(str));
-    }
-    cout << "Dovde sam stigao" << endl;
-    cout << numbers.size() << endl;
-    for(int c = 0; c < (int)IFM[0][0].size(); c++)
-    {
-        for(int x = 0; x < (int)IFM.size(); x++)
-        {
-            for(int y = 0; y < (int)IFM[0].size(); y++)
-            {
-                IFM[x][y][c] = numbers[0];
-                numbers.erase(numbers.begin());
-            }
-        }
-    }
-    file.close();
-    cout << "Ucitan je ulaz" << endl;
+                std :: cout << "Normalizacija! ";
+                Normalize(IFM);
 
-    LoadFile("test_weights.txt", W);
-    cout << "Ucitane su tezine" << endl;
-    Conv2D(W, IFM, OFM);
-    cout << "Odradjena je konvolucija" << endl;
-    WriteFile("Conv2D_result.txt", OFM);
-    cout << "Rezultat je upisan" << endl;
+                break;
+
+            case 5:
+
+                std :: cout << "Denormalizacija! ";
+                Denormalize(IFM);
+
+                break;
+
+            case 2:
+
+                std :: cout << "Sabiranje! ";
+                Add(IFM, output_stack.top());
+                output_stack.pop();
+
+                if(desc[i].save)
+                    output_stack.push(IFM);
+
+                break;
+
+            case 3:
+
+                std :: cout << "Pixel Shuffle! ";
+                Pixel_Shuffle(IFM, 2);
+
+                break;
+
+            case 6:
+
+                std :: cout << "ReLu aktivacija! ";
+                ReLu(IFM);
+
+                break;
+
+            case 1:
+
+                std :: cout << "Konvolucija! ";
+
+                // prvi put kad se dodaje u stack, onda mora dupli
+                float4D W(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));
+                std :: vector <t> b(desc[i].c); // bias deo
+                LoadFile(desc[i].path, W); // ucitavanje tezina za taj sloj
+                if(use_bias)
+                    LoadBias(desc[i].bias_path, b);
+                Conv2D(W, IFM, b, use_bias);
+                if(desc[i].save)
+                {
+                    output_stack.push(IFM);
+                    output_stack.push(IFM);
+                }
+
+                W.clear(); // brisem za svaki slucaj ceo vector
+                b.clear();
+
+                break;
+
+        }
+
+        std :: cout << "Odradjen je " << ++counter << ". sloj, " << "Stak ima " << output_stack.size() << " elemenata" << std :: endl;
+    }
+
+    WriteFile("Conv2D_result.txt", IFM);
+    std :: cout << "Upisan rezultat" << std :: endl;
+
+    IFM.clear();
 
     return 0;
 }

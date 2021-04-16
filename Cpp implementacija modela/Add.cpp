@@ -1,6 +1,8 @@
 #include "Add.h"
 
-void Add(const vector<vector<vector<float>>> &IFM1, const vector<vector<vector<float>>> &IFM2)
+using namespace std;
+
+void Add(float3D &IFM1, const float3D &IFM2)
 {
     for(int wi = 0; wi < (int)IFM1.size(); wi++)
     {
