@@ -14,8 +14,12 @@ typedef struct layer_block
     bool save;
     std :: string path;
     std :: string bias_path;
+    std :: string wfile;
+    std :: string bfile;
 
 } layer_block;
+
+void ResBlock(float3D &, float4D &, std :: vector<t> &, std :: string, std :: string, std :: string, std :: string, bool);
 
 // Funkcija za ucitavanje opisa modela
 void LoadModelDescription(std :: string path, std :: vector <layer_block> &desc)
@@ -44,6 +48,8 @@ void LoadModelDescription(std :: string path, std :: vector <layer_block> &desc)
         lb.c = stoi(line_seg[3]);
         lb.path = line_seg[5];
         lb.bias_path = line_seg[6];
+        lb.wfile = line_seg[7];
+        lb.bfile = line_seg[8];
         if(line_seg[4] == "True")
             lb.save = true;
         else
@@ -64,7 +70,7 @@ int main()
     int counter = 0;
     bool use_bias = false;
 
-    LoadModelDescription("model_desc.txt", desc);// Ucitavanje opisa modela
+    LoadModelDescription("model_desc_mod.txt", desc);// Ucitavanje opisa modela
     std :: cout << "Ucitan opis modela" << std :: endl;
 
     float3D IFM(desc[0].x, std :: vector <std :: vector <t>> (desc[0].y, std :: vector <t> (desc[0].c)));
@@ -134,25 +140,42 @@ int main()
 
                 break;
 
+            case 7:
+
+                std :: cout << "ResBlock! ";
+                {
+
+                    float4D W_res(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));
+                    std :: vector <t> b_res(desc[i].c);
+
+                    ResBlock(IFM, W_res, b_res, desc[i].path, desc[i].bias_path, desc[i].wfile, desc[i].bfile, false);
+
+                    W_res.clear();
+                    b_res.clear();
+
+                }
+
+                break;
+
             case 1:
 
                 std :: cout << "Konvolucija! ";
-
-                // prvi put kad se dodaje u stack, onda mora dupli
-                float4D W(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));
-                std :: vector <t> b(desc[i].c); // bias deo
-                LoadFile(desc[i].path, W); // ucitavanje tezina za taj sloj
-                if(use_bias)
-                    LoadBias(desc[i].bias_path, b);
-                Conv2D(W, IFM, b, use_bias);
-                if(desc[i].save)
                 {
-                    output_stack.push(IFM);
-                    output_stack.push(IFM);
-                }
 
-                W.clear(); // brisem za svaki slucaj ceo vector
-                b.clear();
+                    // prvi put kad se dodaje u stack, onda mora dupli
+                    float4D W(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));
+                    std :: vector <t> b(desc[i].c); // bias deo
+                    LoadFile(desc[i].path, W); // ucitavanje tezina za taj sloj
+                    if(use_bias)
+                        LoadBias(desc[i].bias_path, b);
+                    Conv2D(W, IFM, b, use_bias);
+                    if(desc[i].save)
+                        output_stack.push(IFM);
+
+                    W.clear(); // brisem za svaki slucaj ceo vector
+                    b.clear();
+
+                }
 
                 break;
 
@@ -167,4 +190,28 @@ int main()
     IFM.clear();
 
     return 0;
+}
+
+void ResBlock(float3D &IFM, float4D &W, std :: vector<t> &b, std :: string wfile1, std :: string bfile1, std :: string wfile2, std :: string bfile2, bool use_bias)
+{
+    float3D temp;
+
+    temp = IFM;
+
+    LoadFile(wfile1, W);
+    LoadBias(bfile1, b);
+
+    Conv2D(W, IFM, b, use_bias);
+
+    ReLu(IFM);
+
+    LoadFile(wfile2, W);
+    LoadBias(bfile2, b);
+
+    Conv2D(W, IFM, b, use_bias);
+
+    Add(IFM, temp);
+
+    temp.clear();
+
 }
