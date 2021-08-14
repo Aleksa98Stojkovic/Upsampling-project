@@ -1,0 +1,200 @@
+# depslib dependency file v1.0
+1628893505 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/main.cpp
+	<iostream>
+	"HW.hpp"
+	"SW.hpp"
+
+1628895726 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/WMEM.cpp
+	"WMEM.hpp"
+
+1628861080 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/WMEM.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628888943 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/common.hpp
+	<systemc>
+	<fstream>
+	<string>
+	<vector>
+
+1628885728 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Interfaces.hpp
+
+1628897278 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/DRAM.cpp
+	"DRAM.hpp"
+
+1628861198 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/DRAM.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628898277 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/PB.cpp
+	"PB.hpp"
+
+1628861330 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/PB.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628898668 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Cache.cpp
+	"Cache.hpp"
+
+1628875489 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Cache.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628876791 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/IP.cpp
+	"IP.hpp"
+
+1628895216 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/IP.hpp
+	"common.hpp"
+	"PB.hpp"
+	"Cache.hpp"
+	"WMEM.hpp"
+	"Router.hpp"
+
+1628891628 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Router.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628885714 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Router.cpp
+	"Router.hpp"
+
+1628888964 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Interconnect.cpp
+	"Interconnect.hpp"
+
+1628888730 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Interconnect.hpp
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_initiator_socket.h>
+	<tlm_utils/simple_target_socket.h>
+
+1628895806 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Config.cpp
+	"Config.hpp"
+
+1628888988 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/Config.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+
+1628892477 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/HW.cpp
+	"HW.hpp"
+
+1628890825 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/HW.hpp
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+	"DRAM.hpp"
+	"Config.hpp"
+	"IP.hpp"
+	"Interconnect.hpp"
+
+1628892685 /home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/SW.hpp
+	"common.hpp"
+	<tlm_utils/simple_initiator_socket.h>
+
+1628893382 source:/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/SW.cpp
+	"SW.hpp"
+
+1628899423 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Cache.cpp
+	"Cache.hpp"
+
+1628875489 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Cache.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628955780 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/common.hpp
+	<systemc>
+	<fstream>
+	<string>
+	<vector>
+
+1628956704 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Interfaces.hpp
+
+1628895806 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Config.cpp
+	"Config.hpp"
+
+1628888988 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Config.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+
+1628892477 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/HW.cpp
+	"HW.hpp"
+
+1628960167 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/HW.hpp
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+	"DRAM.hpp"
+	"IP_rtl_full.hpp"
+	"Interconnect.hpp"
+
+1628956763 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/DRAM.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628895216 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/IP.hpp
+	"common.hpp"
+	"PB.hpp"
+	"Cache.hpp"
+	"WMEM.hpp"
+	"Router.hpp"
+
+1628861330 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/PB.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628861080 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/WMEM.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628891628 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Router.hpp
+	"common.hpp"
+	"Interfaces.hpp"
+
+1628888730 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Interconnect.hpp
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_initiator_socket.h>
+	<tlm_utils/simple_target_socket.h>
+
+1628888964 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Interconnect.cpp
+	"Interconnect.hpp"
+
+1628876791 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/IP.cpp
+	"IP.hpp"
+
+1628893505 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/main.cpp
+	<iostream>
+	"HW.hpp"
+	"SW.hpp"
+
+1628892685 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/SW.hpp
+	"common.hpp"
+	<tlm_utils/simple_initiator_socket.h>
+
+1628898277 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/PB.cpp
+	"PB.hpp"
+
+1628885714 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/Router.cpp
+	"Router.hpp"
+
+1628962662 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/SW.cpp
+	"SW.hpp"
+
+1628895726 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/WMEM.cpp
+	"WMEM.hpp"
+
+1628956858 source:/home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/DRAM.cpp
+	"DRAM.hpp"
+
+1628960956 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/IP_rtl_full.hpp
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+	"IP_rtl.hpp"
+	"Interfaces.hpp"
+
+1628946369 /home/aleksa98stojkovic/Desktop/Model_COSIM/Model_v_2/IP_rtl.hpp
+	"common.hpp"
+
