@@ -36,7 +36,7 @@ cache::cache(sc_module_name name) :
 
 void cache::write_cache(dram_word* data, dram_word* cache_line)
 {
-    for(int i = 0; i < DATA_DEPTH / 5 + 1; i++)
+    for(int i = 0; i < DATA_DEPTH / 4; i++)
     {
         *(cache_line + i) = data[i];
     }
@@ -51,6 +51,7 @@ void cache::write()
 
     // Initial
     data = new dram_word[DATA_HEIGHT];
+    // --------------------------------------- //
     cache_DRAM_port->read_cache_DRAM(data, start_address_address, offset); // Reading data from DRAM
 
     for(int i = 0; i < DATA_HEIGHT; i++)
@@ -58,7 +59,7 @@ void cache::write()
         start_address[i] = data[i];
     }
     delete data;
-
+    // --------------------------------------- //
 
     cout << "WRITE::Elapsed time: " << offset << endl;
 
@@ -78,11 +79,12 @@ void cache::write()
                 if(cache_init < CACHE_SIZE)
                 {
                     data = new dram_word;
-                    cache_DRAM_port->read_cache_DRAM(data, start_address[x_i + d] + y_i * (DATA_DEPTH / 5 + 1), offset);
-                    write_cache(data, cache_mem + free_cache_line * (DATA_DEPTH / 5 + 1));
+                    // --------------------------------------- //
+                    cache_DRAM_port->read_cache_DRAM(data, start_address[x_i + d] + y_i * (DATA_DEPTH / 4), offset);
+                    // --------------------------------------- //
+                    write_cache(data, cache_mem + free_cache_line * (DATA_DEPTH / 4));
                     cout << "WRITE::Elapsed time: " << offset << endl;
                     delete data;
-                    // address_hash[free_cache_line] = (x_i + d) * max_y + y_i;
                     if((y_i == 0) || (y_i == DATA_WIDTH - 1))
                     {
                         amount_hash[free_cache_line] = 1;
@@ -120,11 +122,10 @@ void cache::write()
 
                     cout << "WRITE::Write is reading data: " << "(" << x_i + d << ", " << y_i << ")" << endl;
                     data = new dram_word;
-                    cache_DRAM_port->read_cache_DRAM(data, start_address[x_i + d] + y_i * (DATA_DEPTH / 5 + 1), offset);
+                    cache_DRAM_port->read_cache_DRAM(data, start_address[x_i + d] + y_i * (DATA_DEPTH / 4), offset);
                     cout << "WRITE::Elapsed time: " << offset << endl;
-                    write_cache(data, cache_mem + free_cache_line * (DATA_DEPTH / 5 + 1));
+                    write_cache(data, cache_mem + free_cache_line * (DATA_DEPTH / 4));
                     delete data;
-                    // address_hash[free_cache_line] = (x_i + d) * max_y + y_i;
 
                     switch(y_i)
                     {
@@ -201,15 +202,15 @@ void cache::read()
 
 
             // Write first element location
-            dram_word* stick_data_cache = cache_mem + cache_line * (DATA_DEPTH / 5 + 1);
-            int j_len;
+            dram_word* stick_data_cache = cache_mem + cache_line * (DATA_DEPTH / 4);
+            int j_len = 4; // number of data points inside one data word
 
-            for(int i = 0; i < DATA_DEPTH / 5 + 1; i++)
+            for(int i = 0; i < DATA_DEPTH / 4; i++)
             {
-                if(i == DATA_DEPTH / 5)
-                    j_len = DATA_DEPTH % 5;
-                else
-                    j_len = 5;
+//                if(i == DATA_DEPTH / 4)
+//                    j_len = DATA_DEPTH % 5;
+//                else
+//                    j_len = 5;
 
                 for(int j = 0; j < j_len; j++)
                 {
@@ -220,7 +221,7 @@ void cache::read()
             }
 
 
-            offset += sc_time((DATA_DEPTH / 5 + 1) * CLK_PERIOD, SC_NS);
+            offset += sc_time((DATA_DEPTH / 4) * CLK_PERIOD, SC_NS);
 
         }
 
@@ -230,6 +231,8 @@ void cache::read()
         int range;
         unsigned char temp;
 
+        // If the last packet of data in a row is being read, than we have to move cache line register for 9 places
+        // in any other case for 3 places
         if(last_cache)
             range = W_kh * W_kw;
         else

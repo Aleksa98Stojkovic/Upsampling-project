@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="Model_v_2" />
+		<Option pch_mode="2" />
+		<Option compiler="gcc" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/Model_v_2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/Model_v_2" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="gcc" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-fexceptions" />
+			<Add directory="/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/" />
+		</Compiler>
+		<Linker>
+			<Add library="systemc" />
+			<Add directory="/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/" />
+		</Linker>
+		<Unit filename="Cache.cpp" />
+		<Unit filename="Cache.hpp" />
+		<Unit filename="Config.cpp" />
+		<Unit filename="Config.hpp" />
+		<Unit filename="DRAM.cpp" />
+		<Unit filename="DRAM.hpp" />
+		<Unit filename="HW.cpp" />
+		<Unit filename="HW.hpp" />
+		<Unit filename="IP.cpp" />
+		<Unit filename="IP.hpp" />
+		<Unit filename="Interconnect.cpp" />
+		<Unit filename="Interconnect.hpp" />
+		<Unit filename="Interfaces.hpp" />
+		<Unit filename="PB.cpp" />
+		<Unit filename="PB.hpp" />
+		<Unit filename="Router.cpp" />
+		<Unit filename="Router.hpp" />
+		<Unit filename="SW.cpp" />
+		<Unit filename="SW.hpp" />
+		<Unit filename="WMEM.cpp" />
+		<Unit filename="WMEM.hpp" />
+		<Unit filename="common.hpp" />
+		<Unit filename="main.cpp" />
+		<Extensions />
+	</Project>
+</CodeBlocks_project_file>
