@@ -37,30 +37,18 @@
 			<Add library="systemc" />
 			<Add directory="/home/aleksa98stojkovic/Desktop/Model_v_2/Model_v_2/" />
 		</Linker>
-		<Unit filename="Cache.cpp" />
-		<Unit filename="Cache.hpp" />
-		<Unit filename="Config.cpp" />
-		<Unit filename="Config.hpp" />
 		<Unit filename="DRAM.cpp" />
 		<Unit filename="DRAM.hpp" />
 		<Unit filename="HW.cpp" />
 		<Unit filename="HW.hpp" />
-		<Unit filename="IP.cpp" />
-		<Unit filename="IP.hpp" />
 		<Unit filename="IP_rtl.hpp" />
 		<Unit filename="IP_rtl_full.cpp" />
 		<Unit filename="IP_rtl_full.hpp" />
 		<Unit filename="Interconnect.cpp" />
 		<Unit filename="Interconnect.hpp" />
 		<Unit filename="Interfaces.hpp" />
-		<Unit filename="PB.cpp" />
-		<Unit filename="PB.hpp" />
-		<Unit filename="Router.cpp" />
-		<Unit filename="Router.hpp" />
 		<Unit filename="SW.cpp" />
 		<Unit filename="SW.hpp" />
-		<Unit filename="WMEM.cpp" />
-		<Unit filename="WMEM.hpp" />
 		<Unit filename="common.hpp" />
 		<Unit filename="main.cpp" />
 		<Extensions />
