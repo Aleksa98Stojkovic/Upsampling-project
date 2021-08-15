@@ -9,15 +9,15 @@
 #define DRAM_ACCESS_TIME 50
 #define CACHE_SIZE 16
 #define DATA_HEIGHT 12
-#define DATA_WIDTH 14
+#define DATA_WIDTH 16
 #define DATA_DEPTH 4
 #define W_kn 2
 #define W_kh 3
 #define W_kw 3
 #define W_kd 4
 #define CLK_PERIOD 10
-#define BIT_WIDTH 12
-#define MASK_DATA (unsigned long long)0x0000000000000fff
+#define BIT_WIDTH 16
+#define MASK_DATA (unsigned long long)0x000000000000ffff
 #define START_ADDRESS_ADDRESS 0x0
 #define START 0x1
 #define HEIGHT 0x2

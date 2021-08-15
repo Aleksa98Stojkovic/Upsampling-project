@@ -16,10 +16,13 @@ DRAM_data::DRAM_data(sc_module_name name) : sc_channel(name)
 
     std::vector<unsigned long long> temp;
 
+    // Generating input data
+
     for(int x = 0; x < DATA_HEIGHT; x++)
     {
         for(int y = 0; y < DATA_WIDTH; y++)
         {
+            // temp is used to store generated data for a single data stick
             temp.clear();
 
             for(int c = 0; c < DATA_DEPTH; c++)
@@ -36,30 +39,32 @@ DRAM_data::DRAM_data(sc_module_name name) : sc_channel(name)
 
             while(len > 0)
             {
-                dram[(x * DATA_WIDTH + y) * (DATA_DEPTH / 5 + 1) + index] = 0;
+                dram[(x * DATA_WIDTH + y) * (DATA_DEPTH / 4) + index] = 0;
+                j_len = 4;
 
-                if(len >= 5)
-                    j_len = 5;
-                else
-                    j_len = len;
+//                if(len >= 5)
+//                    j_len = 5;
+//                else
+//                    j_len = len;
 
                 for(int j = 0; j < j_len; j++)
                 {
-                    dram[(x * DATA_WIDTH + y) * (DATA_DEPTH / 5 + 1) + index] |= (MASK_DATA & temp[index * 5 + j]) << (BIT_WIDTH * j);     // (x * y_max + y) * z_max + z
+                    dram[(x * DATA_WIDTH + y) * (DATA_DEPTH / 4) + index] |= (MASK_DATA & temp[index * 4 + j]) << (BIT_WIDTH * j);     // (x * y_max + y) * z_max + z
                 }
 
                 index++;
-                len -= 5;
+                len -= 4;
             }
         }
     }
 
 
+    // Generating Table of addresses
     cnt = 0;
 
-    for(int i = (DATA_DEPTH / 5 + 1) * DATA_WIDTH * DATA_HEIGHT; i < (DATA_DEPTH / 5 + 1) * DATA_WIDTH * DATA_HEIGHT + DATA_HEIGHT; i++)
+    for(int i = (DATA_DEPTH / 4) * DATA_WIDTH * DATA_HEIGHT; i < (DATA_DEPTH / 4) * DATA_WIDTH * DATA_HEIGHT + DATA_HEIGHT; i++)
     {
-        dram[i] = cnt * (DATA_DEPTH / 5 + 1) * DATA_WIDTH;
+        dram[i] = cnt * (DATA_DEPTH / 4) * DATA_WIDTH;
         cnt++;
     }
 
@@ -78,18 +83,18 @@ void DRAM_data::read_cache_DRAM(dram_word* data, const unsigned int &address, sc
 
     switch(address)
     {
-        case 0 ... (DATA_DEPTH / 5 + 1) * DATA_WIDTH * DATA_HEIGHT - 1:
+        case 0 ... (DATA_DEPTH / 4) * DATA_WIDTH * DATA_HEIGHT - 1:
 
-            offset += sc_time((DATA_DEPTH / 5 + 1) * CLK_PERIOD + DRAM_ACCESS_TIME * CLK_PERIOD, SC_NS);
+            offset += sc_time((DATA_DEPTH / 4) * CLK_PERIOD + DRAM_ACCESS_TIME * CLK_PERIOD, SC_NS);
 
-            for(int i = 0; i < (DATA_DEPTH / 5 + 1); i++)
+            for(int i = 0; i < (DATA_DEPTH / 4); i++)
             {
                 data[i] = dram[address + i];
             }
 
             break;
 
-        case (DATA_DEPTH / 5 + 1) * DATA_WIDTH * DATA_HEIGHT:
+        case (DATA_DEPTH / 4) * DATA_WIDTH * DATA_HEIGHT:
 
             offset += sc_time(DATA_HEIGHT * CLK_PERIOD + DRAM_ACCESS_TIME * CLK_PERIOD, SC_NS);
 

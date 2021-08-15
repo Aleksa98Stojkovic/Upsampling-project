@@ -1387,3 +1387,91 @@
 	"Weights_mem.hpp"
 	<string>
 
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Cache.cpp
+	"Cache.hpp"
+	<tlm>
+	<string>
+
+1628364123 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Cache.hpp
+	<systemc>
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+	"common.hpp"
+	"interfaces.hpp"
+	"DRAM_data.hpp"
+
+1628364338 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/common.hpp
+	<vector>
+	<queue>
+	<systemc>
+	<iostream>
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/interfaces.hpp
+	<systemc>
+	"common.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/DRAM_data.hpp
+	<systemc>
+	"interfaces.hpp"
+	"common.hpp"
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/DRAM_data.cpp
+	"DRAM_data.hpp"
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Interconnect.cpp
+	"Interconnect.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Interconnect.hpp
+	"common.hpp"
+	<systemc>
+	<tlm>
+	<tlm_utils/simple_initiator_socket.h>
+	<tlm_utils/simple_target_socket.h>
+
+1628362672 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/main.cpp
+	<iostream>
+	"VP.hpp"
+	"TB.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/VP.hpp
+	<systemc>
+	"common.hpp"
+	<tlm>
+	<tlm_utils/simple_initiator_socket.h>
+	<tlm_utils/simple_target_socket.h>
+	"PB.hpp"
+	"Cache.hpp"
+	"Weights_mem.hpp"
+	"Interconnect.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/PB.hpp
+	<systemc>
+	"common.hpp"
+	"interfaces.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Weights_mem.hpp
+	<systemc>
+	<tlm>
+	<tlm_utils/simple_target_socket.h>
+	"common.hpp"
+	"interfaces.hpp"
+
+1628362503 /home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/TB.hpp
+	<systemc>
+	"common.hpp"
+	<tlm_utils/simple_initiator_socket.h>
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/PB.cpp
+	"PB.hpp"
+	<string>
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/TB.cpp
+	"TB.hpp"
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/VP.cpp
+	"VP.hpp"
+
+1628362503 source:/home/aleksa98stojkovic/Desktop/Upsampling-project/SystemC_model/Weights_mem.cpp
+	"Weights_mem.hpp"
+	<string>
+

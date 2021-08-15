@@ -54,7 +54,7 @@ class cache :
         bool relu;                          // indicates whether ReLu is used or not
 
         // Internal resources
-        dram_word cache_mem[CACHE_SIZE * (DATA_DEPTH / 5 + 1)];
+        dram_word cache_mem[CACHE_SIZE * (DATA_DEPTH / 4)];
         unsigned char amount_hash[CACHE_SIZE];      // holds remaining number of reads for every cache line
         unsigned int start_address[DATA_HEIGHT];    // holds starting addresses of data blocks
         std::queue<unsigned char> write_en;         // indicates when and which cache line is free for write function
