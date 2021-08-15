@@ -7,7 +7,7 @@ DRAM::DRAM(sc_module_name name) : sc_channel(name)
 {
     // Filling in dram with data drom a txt file
     ifstream file;
-    file.open("data_sysc.txt");
+    file.open("dram_contenet_COSIM.txt");
     if(file.fail())
     {
         cerr << "DRAM::Error opening file!" << endl;
@@ -87,7 +87,7 @@ void DRAM::write_ip_rtl_full_dram(std::vector<dram_word> &data)
     {
 
         ofstream file;
-        file.open("result_cosim.txt");
+        file.open("result_COSIM_sysc.txt");
         if(file.fail())
         {
             cerr << "DRAM::Error opening file!" << endl;
