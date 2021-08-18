@@ -58,7 +58,7 @@ class IP_rtl : public sc_core::sc_foreign_module
         sc_core::sc_in<sc_dt::sc_logic> axi_read_valid_i;
         sc_core::sc_out<sc_dt::sc_logic> axi_read_ready_o;
 
-        const char* hdl_name() const { return "IP_rtl"; }
+        const char* hdl_name() const { return "IP_with_router_top"; }
 };
 
 #endif // IP_RTL_HPP_INCLUDED
