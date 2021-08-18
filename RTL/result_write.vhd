@@ -72,6 +72,23 @@ end result_write;
 
 architecture Behavioral of result_write is
 
+component bias_ROM is
+    generic(
+         width      : natural := 32;
+         addr_width : natural := 6; 
+         size       : natural := 64);
+    Port(
+         --------------- Clocking and reset interface ---------------
+         clk_i : in std_logic;
+         
+         ------------------- Input data interface -------------------
+         addr_i  : in std_logic_vector(addr_width - 1 downto 0);
+         
+         ------------------- Output data interface -------------------
+         rdata_o : out std_logic_vector(width - 1 downto 0)
+         );
+end component;
+
 type reg_group is array(0 to MAC_count - 1) of std_logic_vector(MAC_width - 1 downto 0);
 signal group_reg, group_next : reg_group;
 
@@ -119,7 +136,7 @@ done_processing_o <= done_reg;
 
 ------------------------------ ROM ------------------------------ 
 
-ROM : entity work.bias_ROM(Behavioral)                     
+ROM : bias_ROM                     
         generic map(
             width      => MAC_width,
             addr_width => addr_width,

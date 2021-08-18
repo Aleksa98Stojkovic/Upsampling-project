@@ -112,6 +112,150 @@ end IP_top;
 
 architecture Behavioral of IP_top is
 
+------------------- components ---------------------
+
+component Weights_Memory_top is
+    generic 
+    (
+        DATA_WIDTH  : integer  := 64; 
+        WRITE_MEM_ADDR : integer  := 10;
+        READ_MEM_ADDR  : integer  := 32;
+        MEM_NMB        : integer  := 16;
+        BRAM_ADDR_OFFSET : integer := 512;
+        
+        BRAM_count : natural := 16;  
+        size       : natural := 9*64       
+    );
+    Port( 
+         ------------------- Clock and Reset interface -------------------
+         clk_i : in std_logic;
+         rst_i : in std_logic;
+         
+         ------------------- PB interface -------------------
+        rdata_o : out std_logic_vector(BRAM_count * DATA_WIDTH - 1 downto 0);
+        raddr_i : in std_logic_vector(WRITE_MEM_ADDR - 1 downto 0);
+        
+        ------------------- Configuraton Register interface -------------------
+        config1 : in std_logic_vector(31 downto 0);
+        config3 : in std_logic_vector(31 downto 0);
+        --config6 : out std_logic_vector(31 downto 0);
+        done_mem_o : out std_logic;
+        
+         ------------------- AXI interface -------------------
+		axi_read_init_o        : out std_logic;
+        axi_read_data_i        : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi_read_last_i        : in std_logic;  
+        axi_read_valid_i       : in std_logic;  
+        axi_read_ready_o       : out std_logic
+        );
+        
+end component;
+
+component PB_top is
+    generic(
+        --fsm
+        WIDTH1 : natural := 18;
+        WIDTH2 : natural := 10;
+        ADDR_WIDTH : natural := 10;
+        
+        --pb unit
+        -- WIDTH_Weight: natural := 16;
+        -- WIDTH_Stick:  natural := 16;
+        WIDTH_Data:   natural := 16;
+        SIGNED_UNSIGNED: string := "signed";
+        
+        --write controller
+        MAC_width  : natural := 32;
+        MAC_count  : natural := 64;
+        bias_base_addr_width : natural := 12; 
+        size       : natural := 64*38
+    );
+    Port (
+        clk_i   : in std_logic;
+        rst_i   : in std_logic;
+        start_i : in std_logic;
+        
+        -- FSM inputs
+        w_valid_i    : in std_logic;
+        d_valid_i    : in std_logic;
+        --num_of_pix_i : in std_logic_vector(WIDTH1 - 1 downto 0);
+        
+        -- FSM outputs
+        req_o : out std_logic; 
+        ready_o : out std_logic;
+        weight_addr_o : out std_logic_vector(ADDR_WIDTH - 1 downto 0);
+        
+        -- PB group inputs
+        data_in : in std_logic_vector(WIDTH_Data-1 downto 0);
+        weight_in : in std_logic_vector(MAC_count * WIDTH_Data - 1 downto 0);
+        
+        ------------------- Config registers -------------------
+        config2 : in std_logic_vector(31 downto 0);
+        config3 : in std_logic_vector(31 downto 0);
+        config4 : in std_logic_vector(31 downto 0);
+        --config6 : out std_logic_vector(31 downto 0);
+        done_o : out std_logic;
+        
+        ------------------- AXI Write interface -------------------
+        axi_write_address_o : out std_logic_vector(31 downto 0);
+		axi_write_init_o	 : out std_logic;       									
+		axi_write_data_o	 : out std_logic_vector(63 downto 0);								
+		axi_write_next_i    : in std_logic;                                
+		axi_write_done_i    : in std_logic
+		 
+		------------------ Result Write controller -----------------
+		--write_base_addr_i : in std_logic_vector(31 downto 0);
+		--bias_base_addr_i : in std_logic_vector(bias_base_addr_width - 1 downto 0);
+		--done_processing_o : out std_logic
+        
+     );
+end component;
+
+component Cache_Top is
+    Generic(
+    
+        col_width : natural := 9;
+        i_width : natural := 10;
+        addr_width : natural := 8;
+        cache_line_count : natural := 15;
+        kernel_size : natural := 9;
+        RF_addr_width : natural := 4;
+        cache_width : natural := 64;
+        Read_data_width : natural := 16;
+        size       : natural := 240
+        
+    );
+    Port (
+        clk_i : in std_logic;
+        rst_i : in std_logic;
+        
+        ------------ PB --------------
+        reg_i : in std_logic;
+        end_i : in std_logic;
+        d_valid_o : out std_logic;
+        cache_data_o : out std_logic_vector(Read_data_width - 1 downto 0);
+        
+        ------------ Config -----------
+        config3 : in std_logic_vector(31 downto 0);
+        config5 : in std_logic_vector(31 downto 0);
+        
+        ------------ AXI ------------
+        axi_read_address_o : out std_logic_vector(31 downto 0);  
+		axi_read_init_o	: out std_logic;
+		axi_read_data_i	: in std_logic_vector(cache_width - 1 downto 0); 
+		axi_read_valid_i : in std_logic;
+		axi_read_last_i : in std_logic;          
+		axi_read_rdy_o  : out std_logic;
+        
+        start_processing_o : out std_logic
+        
+    );
+end component;
+
+----------------------------------------------------
+
+
 signal rdata_s : std_logic_vector(BRAM_count * DATA_WIDTH - 1 downto 0);
 signal raddr_s : std_logic_vector(ADDR_WIDTH - 1 downto 0);
 
@@ -131,7 +275,7 @@ begin
 --####################################################################################
 --                               WEIGHTS MEMORY                                        
 ---------------------------------------------------------------------------------------
-WMEM_module: entity work.Weights_Memory_top(Behavioral)
+WMEM_module: Weights_Memory_top
     generic map(
         DATA_WIDTH  => DATA_WIDTH,
         WRITE_MEM_ADDR => ADDR_WIDTH,
@@ -166,7 +310,7 @@ WMEM_module: entity work.Weights_Memory_top(Behavioral)
 --####################################################################################
 --                               PROCESSING BLOCK                                        
 ---------------------------------------------------------------------------------------
-PB_module: entity work.PB_top(Behavioral)    
+PB_module: PB_top    
     generic map(
         --fsm
         WIDTH1 => 2 * col_width,
@@ -218,7 +362,7 @@ PB_module: entity work.PB_top(Behavioral)
 --####################################################################################
 --                                      CACHE                                        
 ---------------------------------------------------------------------------------------
-Cache_module: entity work.Cache_Top(Behavioral)
+Cache_module: Cache_Top
     generic map(
         -- Read
         col_width => col_width,

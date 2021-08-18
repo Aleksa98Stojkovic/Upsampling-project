@@ -71,13 +71,77 @@ end Weights_Memory_top;
 
 architecture Behavioral of Weights_Memory_top is
 
+-------------- components --------------
+component Weights_Mem_Controler is
+  generic 
+  (
+        DATA_IN_WIDTH  : integer  := 64;      -- Only 48 bits are used, but AXI IF is 64 bit wide
+        DATA_OUT_WIDTH : integer  := 64;
+        WRITE_MEM_ADDR : integer  := 10;
+        READ_MEM_ADDR  : integer  := 32;
+        MEM_NMB        : integer  := 16;
+        BRAM_ADDR_OFFSET : integer := 512       
+  );
+  Port 
+  (     
+        -- Inputs
+        clk_i             : in std_logic;
+        rst_i             : in std_logic;
+        
+        -- Config Registers
+        config1 : in std_logic_vector(31 downto 0);
+        config3 : in std_logic_vector(31 downto 0); 
+        --config6 : out std_logic_vector(31 downto 0); 
+        done_mem_o : out std_logic;
+        
+        -- Outputs
+        waddr_o       : out std_logic_vector(WRITE_MEM_ADDR-1 downto 0);
+        data_o        : out std_logic_vector(DATA_OUT_WIDTH-1 downto 0);
+        we_o          : out std_logic_vector(MEM_NMB-1 downto 0); -- 16 bit vector for enabling 1 weights memory at a time.
+		
+        --AXI ports:
+		axi_read_init_o        : out std_logic;
+        axi_read_data_i        : in std_logic_vector(DATA_IN_WIDTH-1 downto 0);
+        axi_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi_read_last_i        : in std_logic;  -- Status signal    -- Indicator that the current data arriving to the controler is the last in the burst of data transfer
+        axi_read_valid_i       : in std_logic;  -- Status signal    -- Indicator that valid data is present on the AXI bus
+        axi_read_ready_o       : out std_logic  -- Status signal
+        
+  );
+end component;
+
+component Weights_Memory is
+    Generic(
+        BRAM_count : natural := 16;  
+        width      : natural := 64;
+        addr_width : natural := 10; 
+        size       : natural := 9*64
+    );
+    Port (
+        --------------- Clocking and reset interface ---------------
+        clk_i : in std_logic;
+        
+        ------------------- Write interface -------------------
+        wdata_i : in std_logic_vector(width - 1 downto 0);
+        write_en_i : in std_logic_vector(BRAM_count - 1 downto 0);
+        waddr_i : in std_logic_vector(addr_width - 1 downto 0);
+        
+        ------------------- Read interface -------------------
+        rdata_o : out std_logic_vector(BRAM_count * width - 1 downto 0);
+        raddr_i : in std_logic_vector(addr_width - 1 downto 0)
+    
+     );
+end component;
+
+------------------------------------------
+
 signal waddr_s : std_logic_vector(WRITE_MEM_ADDR - 1 downto 0);
 signal data_s : std_logic_vector(DATA_WIDTH - 1 downto 0);
 signal we_s : std_logic_vector(BRAM_count - 1 downto 0);
 
 begin
 
-Mem_Ctrl: entity work.Weights_Mem_Controler(Behavioral)
+Mem_Ctrl: Weights_Mem_Controler
 generic map(
         DATA_IN_WIDTH  => DATA_WIDTH,
         DATA_OUT_WIDTH => DATA_WIDTH,
@@ -105,7 +169,7 @@ port map(
 );
 
 
-Mem: entity work.Weights_Memory(Behavioral)
+Mem: Weights_Memory
 generic map(
         BRAM_count => BRAM_count,  
         width => DATA_WIDTH,

@@ -95,6 +95,114 @@ end IP_with_router_top;
 
 architecture Behavioral of IP_with_router_top is
 
+---------------- Components ----------------
+
+component IP_top is
+    Generic(
+        -------------------------- WMEM module -------------------------- 
+        DATA_WIDTH       : integer := 64; 
+        READ_MEM_ADDR    : integer := 32;
+        BRAM_ADDR_OFFSET : integer := 512;
+        BRAM_count       : natural := 16;  
+        wmem_size        : natural := 9*64;
+        
+        -------------------------- PB module -------------------------- 
+        WIDTH           : natural := 10;
+        ADDR_WIDTH      : natural := 10;
+        WIDTH_Data      : natural := 16;
+        SIGNED_UNSIGNED : string  := "signed";
+        MAC_width       : natural := 32;
+        bias_base_addr_width : natural := 12; 
+        bias_size       : natural := 64*38;
+        
+        -------------------------- Cache module --------------------------
+        col_width        : natural := 9;
+        i_width          : natural := 10;
+        cache_addr_width : natural := 8;
+        cache_line_count : natural := 15;
+        kernel_size      : natural := 9;
+        RF_addr_width    : natural := 4;
+        size             : natural := 240
+         
+    );
+    Port(
+        ------------------- Clock and Reset interface -------------------
+        clk_i : in std_logic;
+        rst_i : in std_logic;
+        
+        ------------------- AXI WMEM Read interface -------------------
+		axi0_read_init_o        : out std_logic;
+        axi0_read_data_i        : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi0_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi0_read_last_i        : in std_logic;  
+        axi0_read_valid_i       : in std_logic;  
+        axi0_read_ready_o       : out std_logic;
+        
+        ------------------- AXI Cache Read interface -------------------
+		axi1_read_init_o        : out std_logic;
+        axi1_read_data_i        : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi1_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi1_read_last_i        : in std_logic;  
+        axi1_read_valid_i       : in std_logic;  
+        axi1_read_ready_o       : out std_logic;
+        
+        ------------------- AXI Write interface -------------------
+        axi_write_address_o  : out std_logic_vector(31 downto 0);
+		axi_write_init_o	 : out std_logic;       									
+		axi_write_data_o	 : out std_logic_vector(63 downto 0);								
+		axi_write_next_i     : in std_logic;                                
+		axi_write_done_i     : in std_logic;
+		
+		------------------- Configuration interface -------------------
+		config1 : in std_logic_vector(31 downto 0);
+		config2 : in std_logic_vector(31 downto 0);
+		config3 : in std_logic_vector(31 downto 0);
+		config4 : in std_logic_vector(31 downto 0);
+		config5 : in std_logic_vector(31 downto 0);
+		config6 : out std_logic_vector(31 downto 0)     
+    );
+end component;
+
+component AXI_router is
+    generic(
+            DATA_WIDTH       : integer := 64;
+            READ_MEM_ADDR    : integer := 32 
+            );
+    Port(
+        ------------------- AXI WMEM Read interface -------------------
+		axi0_read_init_i        : in std_logic;
+        axi0_read_data_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi0_read_addr_i        : in std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi0_read_last_o        : out std_logic;  
+        axi0_read_valid_o       : out std_logic;  
+        axi0_read_ready_i       : in std_logic;
+        
+        ------------------- AXI Cache Read interface -------------------
+		axi1_read_init_i        : in std_logic;
+        axi1_read_data_o        : out std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi1_read_addr_i        : in std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi1_read_last_o        : out std_logic;  
+        axi1_read_valid_o       : out std_logic;  
+        axi1_read_ready_i       : in std_logic;
+        
+        ------------------- Config register -------------------
+        config3 : in std_logic_vector(31 downto 0);
+        --sel_axi_module_i : in std_logic; -- 0 = axi0, 1 = axi1
+        
+        ------------------- AXI Read interface -------------------
+        axi_read_init_o        : out std_logic;
+        axi_read_data_i        : in std_logic_vector(DATA_WIDTH-1 downto 0);
+        axi_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
+        axi_read_last_i        : in std_logic;  
+        axi_read_valid_i       : in std_logic;  
+        axi_read_ready_o       : out std_logic
+        );
+        
+end component;
+---------------------------------------------
+
+
+
 signal axi0_read_init_s, axi1_read_init_s : std_logic;
 signal axi0_read_data_s, axi1_read_data_s : std_logic_vector(DATA_WIDTH-1 downto 0);
 signal axi0_read_addr_s, axi1_read_addr_s : std_logic_vector(READ_MEM_ADDR-1 downto 0);
@@ -131,7 +239,7 @@ axi_write_data_o <= axi_write_data_s;
 axi_write_next_s <= axi_write_next_i;                                
 axi_write_done_s <= axi_write_done_i;
 
-IP: entity work.IP_top(Behavioral)
+IP: IP_top
 generic map(
         -------------------------- WMEM module -------------------------- 
         DATA_WIDTH => DATA_WIDTH, 
@@ -196,7 +304,7 @@ port map(
 );
 
 
-Router: entity work.AXI_router(Behavioral)
+Router: AXI_router
 generic map(
             DATA_WIDTH => DATA_WIDTH,
             READ_MEM_ADDR => READ_MEM_ADDR         

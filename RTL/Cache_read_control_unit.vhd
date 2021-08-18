@@ -72,6 +72,54 @@ end Cache_read_control_unit;
 
 architecture Behavioral of Cache_read_control_unit is
 
+component Register_bank_sync is
+    generic(
+            width      : natural := 2;
+            reg_num    : natural := 15;
+            addr_width : natural := 4
+            );
+    Port(
+         --------------- Clocking and reset interface ---------------
+        clk_i : in std_logic;
+        rst_i : in std_logic;
+        
+        ------------------- Read interface -------------------
+        rdata    : out std_logic_vector(width - 1 downto 0);
+        raddress : in std_logic_vector(addr_width - 1 downto 0);
+        
+        ------------------- Write interface -------------------
+        wdata1    : in std_logic_vector(width - 1 downto 0);
+        waddress1 : in std_logic_vector(addr_width - 1 downto 0);
+        write1    : in std_logic;
+        
+        wdata2    : in std_logic_vector(width - 1 downto 0);
+        waddress2 : in std_logic_vector(addr_width - 1 downto 0);
+        write2    : in std_logic
+        );
+end component;
+
+component Cache_line_register is
+    Generic(
+            DATA_WIDTH : natural := 8;
+            N_in_up    : natural := 15;
+            N_in_down  : natural := 9
+            );
+    Port(
+         --------------- Clocking and reset interface ---------------
+        clk_i : in std_logic;
+        rst_i : in std_logic;
+        ------------------- Input data interface -------------------
+        shift_up_i      : in std_logic;
+        shift_down_i    : in std_logic;
+        write_en_up_i   : in std_logic;
+        write_en_down_i : in std_logic;
+        data_i          : in std_logic_vector(N_in_up * DATA_WIDTH - 1 downto 0);
+        ------------------- Output data interface -------------------
+        data_s_o   : out std_logic_vector(DATA_WIDTH - 1 downto 0) 
+         );
+end component;
+
+
 -- Constants --
 constant i_comp1 : natural := 9;
 constant i_comp2 : natural := 3;  
@@ -127,7 +175,7 @@ output_width_i <= config5(8 downto 0);
 
 
 -- Additional components --
-Dual_reg : entity work.Cache_line_register(Behavioral)
+Dual_reg : Cache_line_register
 generic map(           
             DATA_WIDTH => addr_width,
             N_in_up => cache_line_count,
@@ -142,7 +190,7 @@ port map(
         data_i => data,
         data_s_o => cache_line);
         
-RF : entity work.Register_bank_sync(Behavioral)
+RF : Register_bank_sync
 generic map(            
             width => 2,
             reg_num => cache_line_count,
