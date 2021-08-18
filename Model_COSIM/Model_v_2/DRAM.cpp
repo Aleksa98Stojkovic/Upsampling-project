@@ -7,7 +7,7 @@ DRAM::DRAM(sc_module_name name) : sc_channel(name)
 {
     // Filling in dram with data drom a txt file
     ifstream file;
-    file.open("dram_contenet_COSIM.txt");
+    file.open("dram_content_COSIM.txt");
     if(file.fail())
     {
         cerr << "DRAM::Error opening file!" << endl;

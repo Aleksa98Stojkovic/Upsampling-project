@@ -1,5 +1,5 @@
+#define SC_MAIN
 #include <iostream>
-
 #include "HW.hpp"
 #include "SW.hpp"
 
