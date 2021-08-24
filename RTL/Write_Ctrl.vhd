@@ -113,24 +113,11 @@ signal flag_reg, flag_next : std_logic;
 -- Comparators --
 signal comp1, comp2, comp3, comp4 : std_logic;
 
--- Functions --
---function comp1_func(col_param : in std_logic_vector) return std_logic is
-
---    variable temp : std_logic := '0';
-
---begin
-
---    for i in col_param'range loop
-    
---        temp := temp or col_param(i);
-    
---    end loop;
-
---    return not temp;
-
---end;
-    
-
+-- Test --
+signal ready_reg: std_logic;
+signal ready_next : std_logic;
+signal cache_write_o_reg : std_logic;
+signal cache_write_o_next : std_logic;
 
 
 begin
@@ -141,9 +128,12 @@ axi_read_address_o <= DDR_addr_reg;
 cache_addr_o <= std_logic_vector((shift_left(unsigned(zeros_1 & wcounter_i), 4)) + unsigned(zeros_2 & counter_16));
 cache_data_o <= axi_read_data_i;
 add <= std_logic_vector(unsigned(col_reg) + shift_left(unsigned(zeros_3 & height_i), 4));
---add1 <= std_logic_vector(shift_left(unsigned(zeros_4 & total_i), 4)) - shift_left(unsigned(zeros_3 & height_i), 4));
 wdata_o <= '1';
 waddress_RF_o <= wcounter_i;
+
+-- Test --
+axi_read_rdy_o <= ready_reg;
+cache_write_o <= cache_write_o_reg;
 
 start_i <= config3(4);
 height_i <= config3(13 downto 5);
@@ -171,16 +161,17 @@ begin
             col_reg <= (others => '0');
             row_reg <= (others => '0');
             DDR_addr_reg <= (others => '0');
-            -- cache_addr_reg <= (others => '0');
             flag_reg <= '1';
+            ready_reg <= '0';
+            cache_write_o_reg <= '0';
             
         else
         
             col_reg <= col_next;
             row_reg <= row_next;
             DDR_addr_reg <= DDR_addr_next;
-            -- cache_addr_reg <= cache_addr_next;
             flag_reg <= flag_next;
+            cache_write_o_reg <= cache_write_o_next;
         
         end if;
     end if;
@@ -273,15 +264,14 @@ begin
 
     -- AXI --
     axi_read_init_o <= '0';
-    axi_read_rdy_o <= '0';
+    ready_next <= '0';
     
     -- RF --
     en_o <= '0';
     write_o <= '0';
     
     -- Cache --
-    -- cache_addr_o <= (others => '0');
-	cache_write_o <= '0';
+	cache_write_o_next <= '0';
 	
 	-- Output --
 	start_processing_o <= '0';
@@ -357,8 +347,8 @@ begin
                     
                 if(counter_4 = "11") then
                 
-                    axi_read_rdy_o <= '1';
-                    
+                    ready_next <= '1';
+                  
                     if(axi_read_last_i = '1') then
                         
                         -- Increment counter_4 because you want it to be 00 for next read transaction
@@ -379,11 +369,11 @@ begin
                     if(rdata_i = '0') then
                         
                         en_16 <= '1';
-                        axi_read_rdy_o <= '1';
+                        ready_next <= '1';
                         
                         -- Signaling to cache that recived data can be written into the memory  
                         -- cache_addr_next <= std_logic_vector((shift_left(unsigned(zeros_1 & wcounter_i), 4)) + unsigned(zeros_2 & counter_16));
-                        cache_write_o <= '1';
+                        cache_write_o_next <= '1';
                         
                         if(counter_16 = "1111") then
                             
