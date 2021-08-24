@@ -114,11 +114,7 @@ signal flag_reg, flag_next : std_logic;
 signal comp1, comp2, comp3, comp4 : std_logic;
 
 -- Test --
-signal ready_reg: std_logic;
-signal ready_next : std_logic;
-signal cache_write_o_reg : std_logic;
-signal cache_write_o_next : std_logic;
-
+signal valid : std_logic;
 
 begin
 
@@ -131,9 +127,6 @@ add <= std_logic_vector(unsigned(col_reg) + shift_left(unsigned(zeros_3 & height
 wdata_o <= '1';
 waddress_RF_o <= wcounter_i;
 
--- Test --
-axi_read_rdy_o <= ready_reg;
-cache_write_o <= cache_write_o_reg;
 
 start_i <= config3(4);
 height_i <= config3(13 downto 5);
@@ -162,8 +155,8 @@ begin
             row_reg <= (others => '0');
             DDR_addr_reg <= (others => '0');
             flag_reg <= '1';
-            ready_reg <= '0';
-            cache_write_o_reg <= '0';
+            
+            valid <= '0';
             
         else
         
@@ -171,8 +164,9 @@ begin
             row_reg <= row_next;
             DDR_addr_reg <= DDR_addr_next;
             flag_reg <= flag_next;
-            cache_write_o_reg <= cache_write_o_next;
-        
+            
+            valid <= axi_read_next_i;
+
         end if;
     end if;
 end process;
@@ -258,20 +252,20 @@ end process;
 
 
 
-FSM_comb : process(current_state, start_pulse, col_reg, row_reg, DDR_addr_reg, axi_read_next_i, flag_reg,
+FSM_comb : process(current_state, start_pulse, col_reg, row_reg, DDR_addr_reg, valid, flag_reg,
                    rdata_i, axi_read_last_i, col_next, add, wcounter_i, counter_4, counter_16, total_i, height_i) is
 begin
 
     -- AXI --
     axi_read_init_o <= '0';
-    ready_next <= '0';
+    axi_read_rdy_o <= '0';
     
     -- RF --
     en_o <= '0';
     write_o <= '0';
     
     -- Cache --
-	cache_write_o_next <= '0';
+	cache_write_o <= '0';
 	
 	-- Output --
 	start_processing_o <= '0';
@@ -325,12 +319,6 @@ begin
             
             next_state <= cache_write;
             
---            -- Waiting for valid signal
---            if(axi_read_next_i = '1') then
---                next_state <= cache_write;
---            else
---                next_state <= trans_init;
---            end if;
             
         ----------------------------------
         -- Ctrl is writing to specific parts of cache memory according to info that has gathered for RF and AXI
@@ -343,11 +331,11 @@ begin
             
             next_state <= cache_write;
             
-            if(axi_read_next_i = '1') then
+            if(valid = '1') then
                     
                 if(counter_4 = "11") then
                 
-                    ready_next <= '1';
+                    axi_read_rdy_o <= '1';
                   
                     if(axi_read_last_i = '1') then
                         
@@ -369,11 +357,11 @@ begin
                     if(rdata_i = '0') then
                         
                         en_16 <= '1';
-                        ready_next <= '1';
+                        axi_read_rdy_o <= '1';
                         
                         -- Signaling to cache that recived data can be written into the memory  
                         -- cache_addr_next <= std_logic_vector((shift_left(unsigned(zeros_1 & wcounter_i), 4)) + unsigned(zeros_2 & counter_16));
-                        cache_write_o_next <= '1';
+                        cache_write_o <= '1';
                         
                         if(counter_16 = "1111") then
                             
