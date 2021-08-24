@@ -50,6 +50,8 @@
 
 #define CLK_PERIOD 10
 
+#define WMEM_TRANS 576*16/64
+
 
 typedef sc_dt::uint64 dram_word;
 typedef int data_point;

@@ -21,6 +21,11 @@ DRAM::DRAM(sc_module_name name) : sc_channel(name)
         input.push_back(temp);
     }
 
+    for(int i = 0; i < 10; i++)
+    {
+	cout << "DRAM::dram value is: " << input[i] << endl;
+    }	
+
     file.close();
 
 

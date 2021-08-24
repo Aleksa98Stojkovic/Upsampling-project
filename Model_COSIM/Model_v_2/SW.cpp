@@ -18,13 +18,13 @@ void SW::Software()
     uint64 address;
     sc_time offset(0, SC_NS);
     tlm_command cmd;
-    int data;
-    int* data_ptr;
+    unsigned int data;
+    unsigned int* data_ptr;
 
     // Config1
     cout << "SW::Writing config1" << endl;
     address = CONFIG1;
-    data = 1600;
+    data = 1600*8;
     data_ptr = &data;
     cmd = TLM_WRITE_COMMAND;
     pl.set_command(cmd);
@@ -35,7 +35,7 @@ void SW::Software()
     // Config2
     cout << "SW::Writing config2" << endl;
     address = CONFIG2;
-    data = 0;
+    data = 10816*8;
     data_ptr = &data;
     cmd = TLM_WRITE_COMMAND;
     pl.set_command(cmd);

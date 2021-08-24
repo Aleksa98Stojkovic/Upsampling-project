@@ -72,7 +72,7 @@ void IP_rtl_full::ChangeConfig()
 void IP_rtl_full::Reset()
 {
     rst_i.write(SC_LOGIC_1);
-    wait(100, SC_NS);
+    wait(20, SC_NS);
     rst_i.write(SC_LOGIC_0);
 }
 
@@ -86,9 +86,12 @@ void IP_rtl_full::AXI_read()
     int state = 0;
     int cnt_32 = 0;
     int cnt_64 = 0;
+    int cnt_wmem_trans = 0;
     int address;
     int exit_flag = 0;
     vector <dram_word> data;
+    
+    int temp_state = -1;
 
     axi_read_data_i.write(0);
     axi_read_last_i.write(SC_LOGIC_0);
@@ -114,7 +117,9 @@ void IP_rtl_full::AXI_read()
                         address = temp.to_int() / 8;
                         data.clear();
                         ip_rtl_full_dram_port->read_ip_rtl_full_dram(address, data);
-                    }
+                    
+			cnt_wmem_trans++;
+		    }
                     else
                         state = 0;
 
@@ -137,6 +142,9 @@ void IP_rtl_full::AXI_read()
 
             case 2:
                 {
+			
+		    // cout <<  "IP_rtl_full::cnt_64 is: " << cnt_64  << endl;
+
                     axi_read_valid_i.write(SC_LOGIC_1);
                     axi_read_data_i.write(data[cnt_64]);
 
@@ -156,12 +164,24 @@ void IP_rtl_full::AXI_read()
                         }
 
                         cnt_64++;
-                    }
+			
+			if(cnt_wmem_trans > WMEM_TRANS)
+			{
+			   axi_read_data_i.write(data[cnt_64]);
+			}
+
+		    }
                 }
                 break;
             default:
-                cout << "Wrong state!" << endl;
+                cout << "IP_rtl_full::Wrong state!" << endl;
         }
+
+	if(temp_state != state)
+	{
+		temp_state = state;
+		cout << "IP_rtl_full::Current state of AXI_read is: " << temp_state << endl;
+	}
 
         if(exit_flag)
         {
@@ -189,8 +209,12 @@ void IP_rtl_full::AXI_write()
     int cnt_64 = 0;
     int count_output = 0;
     int exit_flag = 0;
+    int first = false;
     vector <dram_word> data;
-    for(int i = 0; i < 64; i++)
+
+    int temp_state = -1;
+
+   for(int i = 0; i < 64; i++)
         data.push_back(0);
 
     axi_write_next_i.write(SC_LOGIC_0);
@@ -211,6 +235,7 @@ void IP_rtl_full::AXI_write()
                     if(axi_write_init_o == SC_LOGIC_1)
                     {
                         state = 1;
+			first = false;
                     }
                     else
                         state = 0;
@@ -233,22 +258,30 @@ void IP_rtl_full::AXI_write()
                 break;
 
             case 2:
-                {
+                {	
 
-                    axi_write_next_i.write(SC_LOGIC_0);
+                    axi_write_next_i.write(SC_LOGIC_1);
                     sc_lv<64> temp = axi_write_data_o;
-                    data[cnt_64] = temp.to_int();
+                    
                     state = 2;
 
                     if(cnt_64 == 63)
                         state = 3;
 
-                    cnt_64++;
+		    if(!first)
+		    {
+			    data[cnt_64] = temp.to_int();
+			    cout << "IP_rtl_full::Vreme odabiranja je AXI write data_o je: " << sc_time_stamp() << ", podatak je: " << data[cnt_64] << ", cnt_64 je: " << cnt_64 << endl;
+			    cnt_64++;
+	 	    }
 
+		    first = false;
                 }
                 break;
 
             case 3:
+
+		state = 0;
 
                 ip_rtl_full_dram_port->write_ip_rtl_full_dram(data);
                 axi_write_done_i.write(SC_LOGIC_1);
@@ -259,8 +292,14 @@ void IP_rtl_full::AXI_write()
                 break;
 
             default:
-                cout << "Wrong state!" << endl;
+                cout << "IP_rtl_full::Wrong state!" << endl;
         }
+
+	if(temp_state != state)
+	{
+		temp_state = state;
+		cout << "IP_rtl_full::Current state of AXI_write is: " << temp_state << endl;
+	}
 
         if(exit_flag)
         {
@@ -297,8 +336,9 @@ void IP_rtl_full::b_transport_bus(pl_t& pl, sc_core::sc_time& offset)
                 break;
 
             case CONFIG3:
-                config2.write(data);
+                config3.write(data);
                 pl.set_response_status(TLM_OK_RESPONSE);
+
                 break;
 
             case CONFIG4:

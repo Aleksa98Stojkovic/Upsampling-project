@@ -2,6 +2,7 @@
 #define SW_HPP_INCLUDED
 
 #include "common.hpp"
+#include <tlm>
 #include <tlm_utils/simple_initiator_socket.h>
 
 class SW : public sc_core::sc_module

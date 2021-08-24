@@ -1,5 +1,6 @@
 #define SC_MAIN
 #include <iostream>
+
 #include "HW.hpp"
 #include "SW.hpp"
 
@@ -17,7 +18,7 @@ int sc_main(int argc ,char* argv[])
 	SW sw("Software");
 	HW hw("Hardware");
 
-    sw.soc.bind(hw.cpu_soc);
+   	sw.soc.bind(hw.cpu_soc);
 
 	sc_start();
 
