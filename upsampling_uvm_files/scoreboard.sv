@@ -37,10 +37,12 @@ class ip_scoreboard extends uvm_scoreboard;
    bit [ADDRESS_WIDTH - 1 : 0] write_address_var  = 0;  //variable for holding start address of to-be-written data 
    bit [DATA_WIDTH - 1 : 0]  result[0:4095];            //expected results stored here   
    int min_read_op = 229;
-   string s;                                            //debug info messages stored here
-       int fd;
-       int d =0;    
-       string line;
+   string s;   
+        string in_fp;                                         //debug info messages stored here
+        string res_fp;
+        int fd;
+        int d =0;    
+        string line;
     
 	function new(string name = "ip_scoreboard", uvm_component parent = null);
 		super.new(name,parent);		
@@ -49,6 +51,12 @@ class ip_scoreboard extends uvm_scoreboard;
 	function void build_phase(uvm_phase phase);
 	    super.build_phase(phase);
 		item_collected_imp = new("item_collected_imp", this);
+		
+        if (!uvm_config_db#(string)::get(null, "ip_test", "input_fp", in_fp))
+            `uvm_fatal("NO_FP",{"File path of inputs must be set for driver ! ",get_full_name()})    
+            
+        if (!uvm_config_db#(string)::get(null, "ip_test", "result_fp", res_fp))
+            `uvm_fatal("NO_FP",{"File path of inputs must be set for driver ! ",get_full_name()})    
     endfunction: build_phase
 	
 	extern virtual function void write(ip_seq_item ip_item);
@@ -136,7 +144,8 @@ function void ip_scoreboard::write(ip_seq_item ip_item);
 function void ip_scoreboard::check_phase(uvm_phase phase);
 
     //*******READ RESULTS FROM FILE*******
-      fd = $fopen(clone_item.res_fp,"r");
+      //fd = $fopen(clone_item.res_fp,"r");
+      fd = $fopen(res_fp,"r");
       if (fd) begin
           `uvm_info(get_type_name(),$sformatf("File opened successfuly: %d", fd), UVM_LOW)
       end
@@ -158,7 +167,8 @@ function void ip_scoreboard::check_phase(uvm_phase phase);
       $fclose(fd);
       d = 0;    
             
-      fd = $fopen(clone_item.in_fp,"r");
+      //fd = $fopen(clone_item.in_fp,"r");
+      fd = $fopen(in_fp,"r");
       if (fd) begin
           `uvm_info(get_type_name(),$sformatf("File opened successfuly: %d", fd), UVM_LOW)
       end

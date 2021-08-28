@@ -21,9 +21,10 @@ class ip_cov_col extends uvm_scoreboard;
     option.per_instance = 1;
     //*******READ OPERATIONS BINS*******
     RAddr : coverpoint clone_item.axi_read_address {
-        bins ADDR_READ = {32'h0 , 32'h2A3E};
+        bins ADDR_READ = {[32'h0 : 32'h15000]} with (item % 512 ==0);
     }
     RInit: coverpoint clone_item.axi_read_init {
+        option.goal = 230;
         bins READ_INIT_HAPPENED = {1};
     }
     RReady: coverpoint clone_item.axi_read_ready {
@@ -33,22 +34,28 @@ class ip_cov_col extends uvm_scoreboard;
         bins READ_VALID_HAPPENED = {1};
     }
     RLast: coverpoint clone_item.axi_read_last {
+        option.goal = 229;
         bins READ_LAST_HAPPENED = {1};
     }
     CxRdyVal: cross RReady, RValid {
-        bins RdyValOL = binsof(RReady.READ_READY_HAPPENED) && binsof(RValid.READ_VALID_HAPPENED) intersect {1};
+        option.at_least = 10816;
+        bins RdyValOL = binsof(RReady.READ_READY_HAPPENED) && binsof(RValid.READ_VALID_HAPPENED);
     }
+    
     //*******WRITE OPERATIONS BINS*******
     WAddr : coverpoint clone_item.axi_write_address {
-        bins ADDR_WRITE = {32'h2A3F, 32'h3A40};
+        bins ADDR_WRITE = {[32'h15200 : 32'h1D000]} with (item % 512 == 0);
     }    
     WInit: coverpoint clone_item.axi_write_init {
+        option.goal = 64;
         bins WRITE_INIT_HAPPENED = {1};
     }
     WNext: coverpoint clone_item.axi_write_next {
+        option.at_least = 4096;
         bins WRITE_NEXT_HAPPENED = {1};
     }
     WDone: coverpoint clone_item.axi_write_done {
+        option.goal = 64;
         bins WRITE_DONE_HAPPENED = {1};
     }  
     WDnNxt: cross WDone, WNext {

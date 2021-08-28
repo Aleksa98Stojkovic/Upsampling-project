@@ -21,8 +21,8 @@ class ip_test1 extends test_base;
         
         seq1 = sequence1::type_id::create("seq1");
         
-        uvm_config_db #(string)::set(null, "ip_test", "input_fp", "dram_content1.txt");
-        uvm_config_db #(string)::set(null, "ip_test", "result_fp", "result1.txt");
+        uvm_config_db #(string)::set(null, "ip_test", "input_fp", "dram_content5.txt");
+        uvm_config_db #(string)::set(null, "ip_test", "result_fp", "result5.txt");
         uvm_config_db #(bit)::set(null, "ip_test", "relu", 1);
     endfunction : build_phase
 

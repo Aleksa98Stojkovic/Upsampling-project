@@ -41,12 +41,13 @@ module ip_verif_top;
    initial begin     
        uvm_config_db#(virtual ip_if)::set(null, "uvm_test_top.env", "ip_if", vif);
        run_test("ip_test1");
+       
    end
    // clock and reset init.
    initial begin
        clk <= 1;                  
        rst <= 1;
-       for (int i = 0; i < 8; i++) begin
+       for (int i = 0; i < 3; i++) begin
 	   @(posedge clk);
        end
        rst <= 0;
