@@ -110,6 +110,7 @@ signal en_64: std_logic;
 
 -- Constants
 constant zeros : std_logic_vector(63 - MAC_width downto 0) := (others => '0');
+constant ones : std_logic_vector(63 - MAC_width downto 0) := (others => '1');
 
 -- Config signals
 signal write_base_addr_i : std_logic_vector(31 downto 0);           -- bazna adresa za upis rezultata
@@ -323,12 +324,22 @@ begin
             axi_write_address_next <= axi_write_address_reg; 
             axi_write_init_o <= '1';
             
-            axi_write_data_next <= zeros & group_reg(63);
             
             if(config3(1) = '1') then
+            
+                axi_write_data_next <= zeros & group_reg(63);
+            
                 if(group_reg(63)(MAC_WIDTH - 1) = '1' ) then
                     axi_write_data_next <= std_logic_vector(to_unsigned(0, 64));
-                end if;                
+                end if;
+            else
+                
+                if(group_reg(63)(MAC_width - 1) = '1') then
+                    axi_write_data_next <= ones & group_reg(63);
+                else
+                    axi_write_data_next <= zeros & group_reg(63);
+                end if;
+                                
             end if;
             
             
@@ -371,6 +382,17 @@ begin
                 if(axi_write_next_i = '1') then
             
                     en_64 <= '1';
+                    
+                    axi_write_data_next <= zeros & group_reg(63);
+                    
+                    if(config3(1) = '0') then
+            
+                        if(group_reg(63)(MAC_width - 1) = '1') then
+                            axi_write_data_next <= ones & group_reg(63);
+                        end if;
+                                    
+                    end if;
+                    
                     axi_write_data_next <= zeros & group_reg(to_integer(unsigned(not counter_64)));       
             
                 end if;
