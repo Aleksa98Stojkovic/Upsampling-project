@@ -383,17 +383,16 @@ begin
             
                     en_64 <= '1';
                     
-                    axi_write_data_next <= zeros & group_reg(63);
+                    axi_write_data_next <= zeros & group_reg(to_integer(unsigned(not counter_64)));
                     
                     if(config3(1) = '0') then
             
                         if(group_reg(63)(MAC_width - 1) = '1') then
-                            axi_write_data_next <= ones & group_reg(63);
+                            axi_write_data_next <= ones & group_reg(to_integer(unsigned(not counter_64)));
                         end if;
                                     
                     end if;
-                    
-                    axi_write_data_next <= zeros & group_reg(to_integer(unsigned(not counter_64)));       
+                           
             
                 end if;
             
