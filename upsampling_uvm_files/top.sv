@@ -40,7 +40,7 @@ module ip_verif_top;
    // run test
    initial begin     
        uvm_config_db#(virtual ip_if)::set(null, "uvm_test_top.env", "ip_if", vif);
-       run_test("ip_test1");
+       run_test("ip_test10");
        
    end
    // clock and reset init.

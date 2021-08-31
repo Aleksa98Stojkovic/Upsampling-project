@@ -10,7 +10,7 @@ class ip_scoreboard extends uvm_scoreboard;
     uvm_analysis_imp#(ip_seq_item, ip_scoreboard) item_collected_imp;
     
 	`uvm_component_utils(ip_scoreboard)
-    //`uvm_analysis_imp_decl(_item_collected_port)
+
   //variables, objects, arrays etc. used for storing input objects and checking:
   ip_seq_item clone_item;
   
@@ -20,25 +20,25 @@ class ip_scoreboard extends uvm_scoreboard;
    write_store_stages write_store_state = write_wait_init_state;
    
    bit [DATA_WIDTH - 1 : 0] sb_memory_space[0:14911];   //array for simulating memory 
-   bit [DATA_WIDTH - 1 : 0] input_from_file[0:10815];
+   bit [DATA_WIDTH - 1 : 0] input_from_file[0:10815];   //array for holding inputs from file
    int ofm_offs = 10816;                                //variable for holding address where OFM starts
-   int weights_offs = 1600;                             //variable for holding address where weights start
-   bit [5 : 0]  rcnt_64 = 0;                            //counter for number of data read to IP
-   bit [5 : 0]  wcnt_64 = 0;                            //counter for number of data written from IP
-   int read_init_happened = 0;                          //variable for holding the number of read init signals that happened (expected 1 for each read operation)
-   int read_data_num = 0;                               //variable for holding number of data read by IP
-   int write_data_num = 0;                              //variable for holding number of data written by IP
-   int read_last_happened = 0;                          //variable for holding the number of times last data signals that happened (expected 1 for each read operation)
-   int write_done_happened = 0;                         //variable for holding the number of time write done has been activated
+   int weights_offs         = 1600;                     //variable for holding address where weights start
+   bit [5 : 0]  rcnt_64     = 0;                        //counter for number of data read to IP
+   bit [5 : 0]  wcnt_64     = 0;                        //counter for number of data written from IP
+   int read_init_happened   = 0;                        //variable for holding the number of read init signals that happened (expected 1 for each read operation)
+   int read_data_num        = 0;                        //variable for holding number of data read by IP
+   int write_data_num       = 0;                        //variable for holding number of data written by IP
+   int read_last_happened   = 0;                        //variable for holding the number of times last data signals that happened (expected 1 for each read operation)
+   int write_done_happened  = 0;                        //variable for holding the number of time write done has been activated
    bit [ADDRESS_WIDTH - 1 : 0] read_address_var  = 0;   //variable for holding start address of to-be-read data     
-   int write_init_happened = 0;                         //variable for holding the number of write init signals that happened (expected 1 for each write operation)
-   int write_next_happened = 0;                         //variable for holding the number of write next signals that happened (expected 64 for each write operation)
-   int write_done_happened = 0;                         //variable for holding the number of write done signals that happened (expected 1 for each write operation)
+   int write_init_happened  = 0;                        //variable for holding the number of write init signals that happened (expected 1 for each write operation)
+   int write_next_happened  = 0;                        //variable for holding the number of write next signals that happened (expected 64 for each write operation)
+   int write_done_happened  = 0;                        //variable for holding the number of write done signals that happened (expected 1 for each write operation)
    bit [ADDRESS_WIDTH - 1 : 0] write_address_var  = 0;  //variable for holding start address of to-be-written data 
-   bit [DATA_WIDTH - 1 : 0]  result[0:4095];            //expected results stored here   
+   bit [DATA_WIDTH - 1 : 0]    result[0:4095];          //expected results stored here   
    int min_read_op = 229;
    string s;   
-        string in_fp;                                         //debug info messages stored here
+        string in_fp;                                   //debug info messages stored here
         string res_fp;
         int fd;
         int d =0;    

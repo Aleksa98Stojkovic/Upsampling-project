@@ -1,18 +1,18 @@
-`ifndef IP_TEST1_SV
-`define IP_TEST1_SV
+`ifndef IP_TEST5_SV
+`define IP_TEST5_SV
 
 `include "ip_seq_pkg.sv"
 import ip_seq_pkg::*;
 
     `include "envireonment.sv"   
 
-class ip_test1 extends test_base;
+class ip_test5 extends test_base;
 
-    `uvm_component_utils(ip_test1)
+    `uvm_component_utils(ip_test5)
     
     sequence1 seq1;
     
-    function new(string name = "ip_test1", uvm_component parent = null);
+    function new(string name = "ip_test5", uvm_component parent = null);
         super.new(name,parent);
     endfunction : new
 

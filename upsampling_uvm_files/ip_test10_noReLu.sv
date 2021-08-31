@@ -1,18 +1,18 @@
-`ifndef IP_TEST2_SV
-`define IP_TEST2_SV
+`ifndef IP_TEST10_NORELU_SV
+`define IP_TEST10_NORELU_SV
 
 `include "ip_seq_pkg.sv"
 import ip_seq_pkg::*;
 
     `include "envireonment.sv"   
 
-class ip_test2 extends test_base;
+class ip_test10_noReLu extends test_base;
 
-    `uvm_component_utils(ip_test2)
+    `uvm_component_utils(ip_test10_noReLu)
     
     sequence1 seq1;
     
-    function new(string name = "ip_test2", uvm_component parent = null);
+    function new(string name = "ip_test10_noReLu", uvm_component parent = null);
         super.new(name,parent);
     endfunction : new
 
@@ -21,9 +21,9 @@ class ip_test2 extends test_base;
         
         seq1 = sequence1::type_id::create("seq1");
         
-        uvm_config_db #(string)::set(null, "ip_test", "input_fp", "dram_content2.txt");
-        uvm_config_db #(string)::set(null, "ip_test", "result_fp", "result2.txt");
-        uvm_config_db #(bit)::set(null, "ip_test", "relu", 1);
+        uvm_config_db #(string)::set(null, "ip_test", "input_fp", "dram_content10.txt");
+        uvm_config_db #(string)::set(null, "ip_test", "result_fp", "result10.txt");
+        uvm_config_db #(bit)::set(null, "ip_test", "relu", 0);
     endfunction : build_phase
 
     task main_phase(uvm_phase phase);
