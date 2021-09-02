@@ -1,0 +1,10 @@
+1. Svaki put kada treba da radimo konvoluciju rezervisemo kontinualni blok memorije
+2. Taj blok treba da ima mesta za ulaze, tezine i izlaze, redom
+3. Dimenzije tog bloka zavise od dimenzija ulaza, jer su tezina konstantne
+4. Ako je Wi sirina i Hi visina ulaza, onda je velicina bloka
+   Wi * Hi * 64 / 4 + 3 * 3 * 64 * 64 / 4 + (Wi - 2) * (Hi - 2) * 64 = Wi * Hi * 16 + 9216 + Wi * Hi * 64 - 2 * Hi * 64 + 2 * 2 * 64 - 2 * Wi * 64 = 
+   = 80 * Wi * Hi - 128 * (Wi + Hi) + 9472
+5. Kada je drajver rezervisao memoriju treba da vrati pokazivac na pocetak tog bloka kako bi se upisali podaci
+6. Aplikacija treba da posalje drajveru adresu ID registra u koji zeli da upise i vrednost koju zeli da upise
+7. Read funkcija samo vraca upisuje vrednost u txt fajl koji aplikacija posle cita
+8. Nakon sto je dobijena proracuna, aplikacija opet komunicira sa upisom u drajver kako bi mu naznacila da oslobodi memorijski prostor koji je rezervisan ranije 
