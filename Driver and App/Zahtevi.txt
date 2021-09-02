@@ -6,7 +6,7 @@
    = 80 * Wi * Hi - 128 * (Wi + Hi) + 9472
 5. Kada je drajver rezervisao memoriju treba da vrati pokazivac na pocetak tog bloka kako bi se upisali podaci
 6. Aplikacija treba da posalje drajveru adresu ID registra u koji zeli da upise i vrednost koju zeli da upise
-7. Read funkcija samo vraca upisuje vrednost u txt fajl koji aplikacija posle cita
+7. Read funkcija samo vraca vrednost
 8. Nakon sto je dobijena proracuna, aplikacija opet komunicira sa upisom u drajver kako bi mu naznacila da oslobodi memorijski prostor koji je rezervisan ranije
 9. Maksimalna velicina bloka bi bila za Wi = 472, Hi = 496 => 18614528 lokacija, odnosno 143 MB
 10. Eventualno da se poslednja konvolucija ne radi sa IP-jem, pa je onda max velicina 4653632 lokacije iliti 0.278 Gb = 35.6 MB
