@@ -126,7 +126,6 @@ cache_data_o <= axi_read_data_i;
 add <= std_logic_vector(unsigned(col_reg) + shift_left(unsigned(zeros_3 & height_i), 4));
 wdata_o <= '1';
 waddress_RF_o <= wcounter_i;
-valid <= axi_read_next_i;
 
 
 start_i <= config3(4);
@@ -157,12 +156,16 @@ begin
             DDR_addr_reg <= (others => '0');
             flag_reg <= '1';
             
+            valid <= '0';
+            
         else
         
             col_reg <= col_next;
             row_reg <= row_next;
             DDR_addr_reg <= DDR_addr_next;
             flag_reg <= flag_next;
+            
+            valid <= axi_read_next_i;
 
         end if;
     end if;
@@ -328,110 +331,59 @@ begin
             
             next_state <= cache_write;
             
-           ------------------------- NEW DESIGN -------------------------- 
-            
-            if(counter_4 = "11") then
-            
-                axi_read_rdy_o <= '1';
+            if(valid = '1') then
+                    
+                if(counter_4 = "11") then
                 
-                if(axi_read_last_i = '1') then
-                    
-                    -- Increment counter_4 because you want it to be 00 for next read transaction
-                    en_4 <= '1';
-                    
-                    -- This means that we have gone trough all cache lines
-                    if(wcounter_i = std_logic_vector(to_unsigned(0, wcounter_i'length)) and flag_reg = '1') then
-                        start_processing_o <= '1';
-                        flag_next <= '0';
+                    axi_read_rdy_o <= '1';
+                  
+                    if(axi_read_last_i = '1') then
+                        
+                        -- Increment counter_4 because you want it to be 00 for next read transaction
+                        en_4 <= '1';
+                        
+                        -- This means that we have gone trough all cache lines
+                        if(wcounter_i = std_logic_vector(to_unsigned(0, wcounter_i'length)) and flag_reg = '1') then
+                            start_processing_o <= '1';
+                            flag_next <= '0';
+                        end if;
+                        
+                        -- Decide what is going to be our next state
+                        next_state <= prep_trans;
                     end if;
                     
-                    -- Decide what is going to be our next state
-                    next_state <= prep_trans;
-                end if;
-            
-            else
-            
-                if(rdata_i = '0') then
-                    axi_read_rdy_o <= '1';
-                       
-                    if(valid = '1') then
+                else
+                    
+                    if(rdata_i = '0') then
                         
                         en_16 <= '1';
+                        axi_read_rdy_o <= '1';
                         
+                        -- Signaling to cache that recived data can be written into the memory  
+                        -- cache_addr_next <= std_logic_vector((shift_left(unsigned(zeros_1 & wcounter_i), 4)) + unsigned(zeros_2 & counter_16));
                         cache_write_o <= '1';
                         
                         if(counter_16 = "1111") then
                             
+							axi_read_rdy_o <= '0';
+							
                             -- Determine the right amount of lives
                             write_RF_o <= '1';
-                            -- Incrementing couter_4
+                            
+                            
                             en_4 <= '1';
+                            
                             -- We should inform RF, by writing '1', that we have stored new data on that particular cache line
                             en_o <= '1';
-                            write_o <= '1';
+                            write_o <= '1'; -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --
                             
                         end if;
                         
                     end if;
                     
                 end if;
-            
+                
             end if;
-            
-            --------------------------------------------------
-            
-            
---            if(valid = '1') then
-                    
---                if(counter_4 = "11") then
-                
---                    axi_read_rdy_o <= '1';
-                  
---                    if(axi_read_last_i = '1') then
-                        
---                        -- Increment counter_4 because you want it to be 00 for next read transaction
---                        en_4 <= '1';
-                        
---                        -- This means that we have gone trough all cache lines
---                        if(wcounter_i = std_logic_vector(to_unsigned(0, wcounter_i'length)) and flag_reg = '1') then
---                            start_processing_o <= '1';
---                            flag_next <= '0';
---                        end if;
-                        
---                        -- Decide what is going to be our next state
---                        next_state <= prep_trans;
---                    end if;
-                    
---                else
-                    
---                    if(rdata_i = '0') then
-                        
---                        en_16 <= '1';
---                        axi_read_rdy_o <= '1';
-                        
---                        -- Signaling to cache that recived data can be written into the memory  
---                        -- cache_addr_next <= std_logic_vector((shift_left(unsigned(zeros_1 & wcounter_i), 4)) + unsigned(zeros_2 & counter_16));
---                        cache_write_o <= '1';
-                        
---                        if(counter_16 = "1111") then
-                            
---                            -- Determine the right amount of lives
---                            write_RF_o <= '1';
-                            
-                            
---                            en_4 <= '1';
-                            
---                            -- We should inform RF, by writing '1', that we have stored new data on that particular cache line
---                            en_o <= '1';
---                            write_o <= '1'; -- !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! --
-                            
---                        end if;
-                        
---                    end if;
-                    
---                end if;
-                
---            end if;
                        
         ----------------------------------
         -- Incrementing olumns counter    
