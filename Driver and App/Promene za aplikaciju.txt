@@ -1,0 +1,4 @@
+1. Dodati funkciju za kvantizovanje i dekvantizovanje
+2. Dodati funkciju koja uzima pokazivac blok memorije i upisuje podatke u dobrom formatu
+3. Dodati funkcije koje formatiraju podatke
+4. Izmeniti deo gde se poziva konvolucija tako da sada imamo rad sa drajverom
