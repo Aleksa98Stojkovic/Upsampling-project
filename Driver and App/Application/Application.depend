@@ -1,0 +1,30 @@
+# depslib dependency file v1.0
+1619764117 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\add.cpp
+	"Add.h"
+
+1619764117 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\add.h
+	"common.h"
+
+1630615370 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\common.h
+	<vector>
+	<iostream>
+	<string>
+	<cstdlib>
+	<cmath>
+	<stack>
+	<fstream>
+	<string>
+	<sstream>
+
+1619764117 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\normalization.cpp
+	"Normalization.h"
+
+1630615324 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\normalization.h
+	"common.h"
+
+1619764117 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\pixel_shuffle.cpp
+	"Pixel_Shuffle.h"
+
+1619764117 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\pixel_shuffle.h
+	"common.h"
+
