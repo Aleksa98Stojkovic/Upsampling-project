@@ -5,7 +5,7 @@ using namespace sc_core;
 
 DRAM::DRAM(sc_module_name name) : sc_channel(name)
 {
-    // Filling in dram with data drom a txt file
+    // Filling in dram with data from a txt file
     ifstream file;
     file.open("dram_content_COSIM.txt");
     if(file.fail())
