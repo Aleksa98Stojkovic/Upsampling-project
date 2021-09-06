@@ -197,7 +197,9 @@ architecture arch_imp of Upsampling_IP_v1_0 is
         axi_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
         axi_read_last_i        : in std_logic;  
         axi_read_valid_i       : in std_logic;  
-        axi_read_ready_o       : out std_logic
+        axi_read_ready_o       : out std_logic;
+        
+        comp5_o : out std_logic
         
 --        -- ILA signals
 --		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
@@ -267,6 +269,9 @@ end component;
 		);
 		port (
 		-- Users to add ports here
+		
+		comp5_i : in std_logic;
+		
 		axi_base_address_i : in std_logic_vector(31 downto 0);  -- Bazna Adresa 
 		
 		--  WRITE CHANNEL
@@ -366,6 +371,8 @@ end component;
 	signal config6_s : std_logic_vector(31 downto 0);
 	signal config7_s : std_logic_vector(31 downto 0);
     
+    signal comp5_s : std_logic;
+
     -- Reset signal
     signal rst_s : std_logic;
 
@@ -425,7 +432,9 @@ Upsampling_Design: IP_with_router_top
         axi_read_addr_o        => axi_read_addr_s,
         axi_read_last_i        => axi_read_last_s,
         axi_read_valid_i       => axi_read_valid_s,
-        axi_read_ready_o       => axi_read_ready_s
+        axi_read_ready_o       => axi_read_ready_s,
+        
+        comp5_o => comp5_s 
         
 --        -- ILA signals
 --		ila_stick_in => ila_stick_in,
@@ -491,6 +500,9 @@ Upsampling_IP_v2_v1_0_M_AXI_inst : Upsampling_IP_v1_0_M_AXI
 	)
 	port map (
 		-- Users to add ports here
+		
+		comp5_i => comp5_s,
+		
 		axi_base_address_i => config7_s,
 		
 		--  WRITE CHANNEL

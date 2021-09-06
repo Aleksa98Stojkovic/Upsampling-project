@@ -38,6 +38,9 @@ entity Upsampling_IP_v1_0_M_AXI is
 		
 		
 		-- Users to add ports here
+		
+		comp5_i : in std_logic;
+		
 		axi_base_address_i : in std_logic_vector(31 downto 0);  -- Bazna Adresa 
 		
 		--  WRITE CHANNEL
@@ -577,10 +580,14 @@ begin
 	     -- accept/acknowledge rdata/rresp with axi_rready by the master    
 	      -- when M_AXI_RVALID is asserted by slave                         
 	      else                                                  
-	          if (M_AXI_RLAST = '1' and axi_rready = '1') then   
+	          if (M_AXI_RLAST = '1' and axi_rready = '1' and M_AXI_RVALID = '1') then   
 	            axi_rready <= '0';                               
-	           else                                              
-	             axi_rready <= axi_read_ready_i;-- ovo smo mi dodali
+	           else 
+	               if(comp5_i = '1' and axi_rready = '1' and M_AXI_RVALID = '1') then                                             
+	                   axi_rready <= '0';
+	               else
+	                   axi_rready <= axi_read_ready_i;-- ovo smo mi dodali
+	               end if;
 	          end if;                                             
 	      end if;                                                
 	    end if;                                                  

@@ -87,6 +87,13 @@ entity PB_top is
 		--write_base_addr_i : in std_logic_vector(31 downto 0);
 		--bias_base_addr_i : in std_logic_vector(bias_base_addr_width - 1 downto 0);
 		--done_processing_o : out std_logic
+		
+		-- ILA signals
+--		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_weight_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_mult_acc : out std_logic_vector(MAC_width - 1 downto 0);
+--		ila_mac_en : out std_logic;
+--		ila_mac_done : out std_logic
         
      );
 end PB_top;
@@ -235,6 +242,9 @@ pb_fsm : FSM_PB
         req_o         => req_s,
         weight_addr_o => weight_addr_s
     );
+    
+--ila_mac_en <= en_s; 
+--ila_mac_done <= done_s;   
 
 
 ------------------------  Generate 16 PB sub-units ------------------------ 
@@ -258,6 +268,10 @@ pb_gen : for i in 1 to 16 generate
         );
     
     end generate;
+
+--ila_stick_in <= data_in_s; 
+--ila_weight_in <= weight_in_s(4 * WIDTH_Data - 1 downto 3 * WIDTH_Data);
+--ila_mult_acc <= data_out_s((WIDTH_Data + WIDTH_Data) - 1 downto 0);
 
 
 ------------------------ Write Controller instantiation ------------------------

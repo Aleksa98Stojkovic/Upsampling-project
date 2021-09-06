@@ -84,7 +84,16 @@ entity IP_with_router_top is
         axi_read_addr_o        : out std_logic_vector(READ_MEM_ADDR-1 downto 0);
         axi_read_last_i        : in std_logic;  
         axi_read_valid_i       : in std_logic;  
-        axi_read_ready_o       : out std_logic
+        axi_read_ready_o       : out std_logic;
+        
+        comp5_o : out std_logic
+        
+--        -- ILA signals
+--		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_weight_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_mult_acc : out std_logic_vector(MAC_width - 1 downto 0);
+--		ila_mac_en : out std_logic;
+--		ila_mac_done : out std_logic
         
         -- DEBUG
        -- debugDiode : out std_logic
@@ -159,7 +168,16 @@ component IP_top is
 		config3 : in std_logic_vector(31 downto 0);
 		config4 : in std_logic_vector(31 downto 0);
 		config5 : in std_logic_vector(31 downto 0);
-		config6 : out std_logic_vector(31 downto 0)     
+		config6 : out std_logic_vector(31 downto 0);
+		
+		comp5_o : out std_logic
+		
+--		-- ILA signals
+--		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_weight_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_mult_acc : out std_logic_vector(MAC_width - 1 downto 0);
+--		ila_mac_en : out std_logic;
+--		ila_mac_done : out std_logic   
     );
 end component;
 
@@ -227,6 +245,8 @@ signal output_width_s : std_logic_vector(col_width - 1 downto 0);
 signal write_start_s : std_logic;
 signal num_of_pix_s : std_logic_vector(2 * col_width - 1 downto 0);
 signal sel_axi_module_s : std_logic;
+
+signal comp5_s : std_logic;
 
 ------------DEBUG
 --signal dbg_diode_s : std_logic := '0';
@@ -300,7 +320,16 @@ port map(
 		config3 => config3,
 		config4 => config4,
 		config5 => config5,
-		config6 => config6
+		config6 => config6,
+		
+		comp5_o => comp5_s 
+		
+--		-- ILA signals
+--		ila_stick_in => ila_stick_in,
+--		ila_weight_in => ila_weight_in,
+--		ila_mult_acc => ila_mult_acc,
+--		ila_mac_en => ila_mac_en,
+--		ila_mac_done => ila_mac_done
 );
 
 
@@ -339,6 +368,7 @@ port map(
         axi_read_ready_o => axi_read_ready_o
 );
 
+comp5_o <= comp5_s;
 
 --------------------------- DEBUG
 --debug_process : process(clk_i) is

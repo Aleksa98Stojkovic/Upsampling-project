@@ -67,7 +67,8 @@ entity Cache_Top is
 		axi_read_last_i : in std_logic;          
 		axi_read_rdy_o  : out std_logic;
         
-        start_processing_o : out std_logic
+        start_processing_o : out std_logic;
+        comp5_o : out std_logic
         
     );
 end Cache_Top;
@@ -172,7 +173,8 @@ component Write_Ctrl is
         wdata_RF_o : out std_logic_vector(1 downto 0);
         
         --------------- Output signal ---------------
-        start_processing_o : out std_logic 
+        start_processing_o : out std_logic;
+        comp5_o : out std_logic
          
          );
 end component;
@@ -245,6 +247,7 @@ signal cache_data_s : std_logic_vector(cache_width - 1 downto 0);
 signal cache_write_s : std_logic;
 
 signal start_processing_s : std_logic;
+signal comp5_s : std_logic;
 
 -- BRAM
 signal write0_s :std_logic;
@@ -329,7 +332,8 @@ Cache_Write: Write_Ctrl
         waddress_RF_o => waddress_RF_s,
         wdata_RF_o => wdata_RF_s,
         --------------- Output signal ---------------
-        start_processing_o => start_processing_s
+        start_processing_o => start_processing_s,
+        comp5_o => comp5_s
     );
     
 DualPortBRAM: Dual_Port_BRAM
@@ -376,5 +380,6 @@ Register_File: RF_for_write
     );    
 
 start_processing_o <= start_processing_s;
+comp5_o <= comp5_s;
 
 end Behavioral;

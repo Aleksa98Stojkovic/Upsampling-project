@@ -71,7 +71,9 @@ entity Write_Ctrl is
         wdata_RF_o : out std_logic_vector(1 downto 0);
         
         --------------- Output signal ---------------
-        start_processing_o : out std_logic 
+        start_processing_o : out std_logic; 
+        comp5_o : out std_logic
+         
          
          );
 end Write_Ctrl;
@@ -112,12 +114,14 @@ signal flag_reg, flag_next : std_logic;
 
 -- Comparators --
 signal comp1, comp2, comp3, comp4 : std_logic;
+signal comp5 : std_logic;
 
 -- Test --
 signal valid : std_logic;
 
 begin
 
+comp5 <= '1' when counter_16 = "1111" else '0';
 
 -- Assigments --
 axi_read_address_o <= DDR_addr_reg;
@@ -250,9 +254,9 @@ end process;
 
 
 FSM_comb : process(current_state, start_pulse, col_reg, row_reg, DDR_addr_reg, valid, flag_reg,
-                   rdata_i, axi_read_last_i, col_next, add, wcounter_i, counter_4, counter_16, total_i, height_i) is
+                   rdata_i, axi_read_last_i, col_next, add, wcounter_i, counter_4, comp5, total_i, height_i) is
 begin
-
+ 
     -- AXI --
     axi_read_init_o <= '0';
     axi_read_rdy_o <= '0';
@@ -360,7 +364,7 @@ begin
                         
                         cache_write_o <= '1';
                         
-                        if(counter_16 = "1111") then
+                        if(comp5 = '1') then
                             
                             axi_read_rdy_o <= '0';
                             

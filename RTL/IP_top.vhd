@@ -93,19 +93,18 @@ entity IP_top is
 		config3 : in std_logic_vector(31 downto 0);
 		config4 : in std_logic_vector(31 downto 0);
 		config5 : in std_logic_vector(31 downto 0);
-		config6 : out std_logic_vector(31 downto 0)
+		config6 : out std_logic_vector(31 downto 0);
 		
---		start_i           : in std_logic;
---		base_addr_i       : in std_logic_vector(READ_MEM_ADDR - 1 downto 0);
---		done_o            : out std_logic;
---		height_i          : in std_logic_vector(col_width - 1 downto 0);
---        total_i           : in std_logic_vector(2 * col_width - 1 downto 0);
---        write_base_addr_i : in std_logic_vector(31 downto 0);
---		bias_base_addr_i  : in std_logic_vector(bias_base_addr_width - 1 downto 0);
---		output_width_i    : in std_logic_vector(col_width - 1 downto 0);
---		write_start_i     : in std_logic;
---		num_of_pix_i      : in std_logic_vector(2 * col_width - 1 downto 0);
---		done_processing_o : out std_logic
+		comp5_o : out std_logic
+		
+--		-- ILA signals
+--		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_weight_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_mult_acc : out std_logic_vector(MAC_width - 1 downto 0);
+--		ila_mac_en : out std_logic;
+--		ila_mac_done : out std_logic
+
+        
         
     );
 end IP_top;
@@ -113,6 +112,23 @@ end IP_top;
 architecture Behavioral of IP_top is
 
 ------------------- components ---------------------
+
+--COMPONENT ila_mac
+
+--PORT (
+--	clk : IN STD_LOGIC;
+
+
+
+--	probe0 : IN STD_LOGIC_VECTOR(0 DOWNTO 0); 
+--	probe1 : IN STD_LOGIC_VECTOR(0 DOWNTO 0); 
+--	probe2 : IN STD_LOGIC_VECTOR(15 DOWNTO 0); 
+--	probe3 : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+--	probe4 : IN STD_LOGIC_VECTOR(31 DOWNTO 0)
+--);
+--END COMPONENT  ;
+
+
 
 component Weights_Memory_top is
     generic 
@@ -204,10 +220,12 @@ component PB_top is
 		axi_write_next_i    : in std_logic;                                
 		axi_write_done_i    : in std_logic
 		 
-		------------------ Result Write controller -----------------
-		--write_base_addr_i : in std_logic_vector(31 downto 0);
-		--bias_base_addr_i : in std_logic_vector(bias_base_addr_width - 1 downto 0);
-		--done_processing_o : out std_logic
+--		-- ILA signals
+--		ila_stick_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_weight_in : out std_logic_vector(WIDTH_Data - 1 downto 0);
+--		ila_mult_acc : out std_logic_vector(MAC_width - 1 downto 0);
+--		ila_mac_en : out std_logic;
+--		ila_mac_done : out std_logic
         
      );
 end component;
@@ -248,7 +266,8 @@ component Cache_Top is
 		axi_read_last_i : in std_logic;          
 		axi_read_rdy_o  : out std_logic;
         
-        start_processing_o : out std_logic
+        start_processing_o : out std_logic;
+        comp5_o : out std_logic
         
     );
 end component;
@@ -266,8 +285,14 @@ signal ready_s : std_logic;
 signal cache_data_s : std_logic_vector(WIDTH_Data - 1 downto 0);
 
 signal start_processing_s : std_logic;
+signal comp5_s : std_logic;
 
 signal done_mem_s, done_proc_s : std_logic;
+
+-- DEBUG
+signal ila_mac_en_s, ila_mac_done_s : std_logic_vector(0 downto 0);
+signal ila_stick_in_s, ila_weight_in_s : std_logic_vector(15 downto 0);
+signal ila_mult_acc_s : std_logic_vector(31 downto 0);
 
 
 begin
@@ -352,10 +377,13 @@ PB_module: PB_top
 		axi_write_data_o	=> axi_write_data_o,
 		axi_write_next_i    => axi_write_next_i,
 		axi_write_done_i    => axi_write_done_i
-		------------------ Result Write controller -----------------
-		--write_base_addr_i => write_base_addr_i,
-		--bias_base_addr_i => bias_base_addr_i, 
-		--done_processing_o => done_processing_o  
+		
+		-- ILA signals
+--		ila_stick_in => ila_stick_in_s,
+--		ila_weight_in => ila_weight_in_s,
+--		ila_mult_acc => ila_mult_acc_s,
+--		ila_mac_en => ila_mac_en_s(0),
+--		ila_mac_done => ila_mac_done_s(0) 
      );
      
      
@@ -395,13 +423,26 @@ Cache_module: Cache_Top
 		axi_read_last_i => axi1_read_last_i,           
 		axi_read_rdy_o  => axi1_read_ready_o,
         
-        start_processing_o => start_processing_s
+        start_processing_o => start_processing_s,
+        comp5_o => comp5_s 
     );
+    
+--ila_mac_dbg : ila_mac
+--PORT MAP (
+--	clk => clk_i,
+--	probe0 => ila_mac_en_s, 
+--	probe1 => ila_mac_done_s, 
+--	probe2 => ila_stick_in_s, 
+--	probe3 => ila_weight_in_s,
+--	probe4 => ila_mult_acc_s 
+--);
+    
+    
 
 config6(0) <= done_mem_s;
 config6(1) <= done_proc_s;
 config6(31 downto 2) <= (others => '0');
 
-
+comp5_o <= comp5_s;
 
 end Behavioral;
