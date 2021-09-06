@@ -39,5 +39,12 @@ void formatWeight(std::vector <dram_word> &weight_o, std::string path); // Podac
 void formatDataIP(float3D &data, dram_word* data_ip);
 // Dodaje nule oko ulaza
 void zero_padding(float3D &data);
-
+// Dodaje nule za prvu konvoluciju, jer je tamo broj kanala jednak 3
+void zero_padding_input(float3D &data);
+// Upis u drajver
+void write_driver(std::string path, int reg_num, int val);
+// Citanje iz drajvera
+int read_driver(std::string path, bool read_pointer); // ako je read_pointer = false -> cita se config, a u suprotnom pokazivac
+// Radi malu konvoluciju
+void convlove(float3D &data_i, std::string w_path, int layer_num, int relu);
 #endif // COMMON_H_INCLUDED

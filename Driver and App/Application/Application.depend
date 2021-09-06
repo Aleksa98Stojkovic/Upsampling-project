@@ -5,7 +5,7 @@
 1619764117 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\add.h
 	"common.h"
 
-1630834784 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\common.h
+1630965834 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\common.h
 	<vector>
 	<iostream>
 	<string>
@@ -43,11 +43,14 @@
 1630615376 c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\load_store.h
 	"common.h"
 
-1630615277 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\main.cpp
+1630957693 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\main.cpp
 	"Add.h"
 	"Conv2D.h"
 	"load_store.h"
 	"Normalization.h"
 	"Pixel_Shuffle.h"
+	"common.h"
+
+1630957337 source:c:\users\alexs\onedrive\desktop\sr - project\upsampling-project\driver and app\application\quantization.cpp
 	"common.h"
 
