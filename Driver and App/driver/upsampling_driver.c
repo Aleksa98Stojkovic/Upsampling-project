@@ -9,7 +9,6 @@
 #include <linux/kernel.h>
 #include <linux/device.h>
 #include <linux/string.h>
-#include <linux/of.h>
 
 #include <linux/io.h> //iowrite ioread
 #include <linux/slab.h>//kmalloc kfree
@@ -30,6 +29,13 @@ dev_t my_dev_id;
 static struct class *my_class;
 static struct device *my_device;
 static struct cdev *my_cdev;
+
+struct upsampling_info {
+	unsigned long mem_start;
+	unsigned long mem_end;
+	void __iomem *base_addr;
+	
+};
 
 //------------------------ prototypes ------------------------//
 static int upsampling_probe (struct platform_device *pdev);
@@ -188,7 +194,7 @@ static int __init upsampling_init(void)
 	}
 	printk(KERN_INFO "class created\n");
 	
-	my_device = device_create(my_class, NULL, my_dev_id, NULL, DEVICE_NAME);	// <--- u primeru sa vezbi stoji DRIVER_NAME, ?
+	my_device = device_create(my_class, NULL, my_dev_id, NULL, DRIVER_NAME);
 	if (my_device == NUL)
 	{
 		printk(KERN_ERR "failed to create device\n");
