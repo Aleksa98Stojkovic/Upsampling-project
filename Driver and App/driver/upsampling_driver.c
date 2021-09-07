@@ -18,6 +18,8 @@
 
 #define DRIVER_NAME "upsampling_driver"
 #define DEVICE_NAME "upsampling"		// <-------- proveriti nakon Petalinux da li ce biti isto "upsampling"
+#define CONFIG_BASE_ADDRESS 0x43c00000
+#define BUFF_SIZE 40
 
 MODULE_AUTHOR ("LARB");
 MODULE_DESCRIPTION("Driver for Upsampling IP.");
@@ -29,6 +31,8 @@ dev_t my_dev_id;
 static struct class *my_class;
 static struct device *my_device;
 static struct cdev *my_cdev;
+static struct upsampling_info *upp = NULL;
+
 
 struct upsampling_info {
 	unsigned long mem_start;
@@ -161,15 +165,113 @@ int upsampling_close(struct inode *pinode, struct file *pfile)
 
 ssize_t upsampling_read(struct file *pfile, char __user *buffer, size_t length, loff_t *offset) 
 {
+	int ret;
+	int len;
+	int base;
+	int	config6;
+	char buff[BUFF_SIZE];
 	
+	printk(KERN_INFO "Driver is reading...\n");
+	base = ioread32(upp->base_addr);
+	config6 = ioread32(upp->base_addr + CONFIG_BASE_ADDRESS + 20);
 	
+	len = scnprintf(buff, BUFF_SIZE, "%d,%d", base, config6);
+	ret = copy_to_user(buf, buff, len);
 	
+	printk(KERN_INFO "Driver sending:%s\n", buff);
+	
+	if(ret)
+	{
+		printk(KERN_ERR "copy_to_user failed\n");
+		return -EFAULT;
+	}
+	
+	printk(KERN_INFO "Succesfully read\n");
+	
+	return 0;
 }
 
 ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t length, loff_t *offset)
 {
+	int ret;
+	int reg_num;
+	int reg_value;
+	char buff[BUFF_SIZE];
 	
+	ret = copy_from_user(buff, buffer, length);
+	if(ret)
+		printk(KERN_ERR "copy_from_user failed\n");
+		return -EFAULT;
+	}
+	buff[length] = '\0';
 	
+	ret = sscanf(buff, "%d,%d", &reg_num, &reg_value);
+	
+	switch(reg_num)
+	{
+		case 1 :
+		
+			printk(KERN_INFO "Writing to config1...\n");
+			iowrite32(reg_value, upp->base_addr + 0);
+		
+			printk(KERN_INFO "Finished writing to config1\n");
+		
+			break;
+		
+		case 2 :
+		
+			printk(KERN_INFO "Writing to config2...\n");
+			iowrite32(reg_value, upp->base_addr + 4);
+		
+			printk(KERN_INFO "Finished writing to config2\n");
+		
+			break;
+			
+		case 3 :
+		
+			printk(KERN_INFO "Writing to config3...\n");
+			iowrite32(reg_value, upp->base_addr + 8);
+		
+			printk(KERN_INFO "Finished writing to config3\n");
+		
+			break;
+			
+		case 4 :
+		
+			printk(KERN_INFO "Writing to config4...\n");
+			iowrite32(reg_value, upp->base_addr + 12);
+		
+			printk(KERN_INFO "Finished writing to config4\n");
+		
+			break;
+		
+		case 5 :
+		
+			printk(KERN_INFO "Writing to config5...\n");
+			iowrite32(reg_value, upp->base_addr + 16);
+		
+			printk(KERN_INFO "Finished writing to config5\n");
+		
+			break;
+			
+		case 7 :
+		
+			printk(KERN_INFO "Writing to config7...\n");
+			iowrite32(reg_value, upp->base_addr + 24);
+		
+			printk(KERN_INFO "Finished writing to config7\n");
+		
+			break;
+		
+		default :
+			
+			printk(KERN_ERR "Wrong register config number\n");
+		
+			break;
+		
+	}
+	
+	return length;
 	
 }
 
