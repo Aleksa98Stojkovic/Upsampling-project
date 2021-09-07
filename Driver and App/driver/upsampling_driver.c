@@ -196,6 +196,7 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 	int ret;
 	int reg_num;
 	int reg_value;
+	char reg_value_str[10];
 	char buff[BUFF_SIZE];
 	
 	ret = copy_from_user(buff, buffer, length);
@@ -205,7 +206,17 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 	}
 	buff[length] = '\0';
 	
-	ret = sscanf(buff, "%d,%d", &reg_num, &reg_value);
+	ret = sscanf(buff, "%d=%s", &reg_num, reg_value_str);
+	
+	// check input value format
+	if(reg_value_str[0]=='0' && (reg_value_str[1]=='x' || reg_value_str[1]=='X'))	// hex input
+	{
+		ret = kstrtol(reg_value_str+2,16,&reg_value);
+	}
+	else
+	{
+		ret = kstrtol(reg_value_str,10,&reg_value);			// dec input
+	}
 	
 	switch(reg_num)
 	{
