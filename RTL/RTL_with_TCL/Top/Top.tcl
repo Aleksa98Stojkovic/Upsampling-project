@@ -556,26 +556,6 @@ Reset#SD 0#UART 1#UART 1#GPIO#GPIO#Enet 0#Enet 0}\
   assign_bd_address -offset 0x00000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces Upsampling_IP_0/m_axi] [get_bd_addr_segs processing_system7_0/S_AXI_HP0/HP0_DDR_LOWOCM] -force
   assign_bd_address -offset 0x43C00000 -range 0x00010000 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs Upsampling_IP_0/s_axi/reg0] -force
 
- 
-#apply_bd_automation -rule xilinx.com:bd_rule:processing_system7 -config {make_external "FIXED_IO, DDR" apply_board_preset "1" Master "Disable" Slave "Disable" }  [get_bd_cells processing_system7_0]
-
-#add Upsampling IP
-#startgroup
-#create_bd_cell -type ip -vlnv FTN:user:Upsampling_IP:1.0 Upsampling_IP_0
-#endgroup
-
-#run block automation
-#startgroup
-#apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/Upsampling_IP_0/m_axi} Slave {/processing_system7_0/S_AXI_HP0} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins processing_system7_0/S_AXI_HP0]
-
-#apply_bd_automation -rule xilinx.com:bd_rule:axi4 -config { Clk_master {Auto} Clk_slave {Auto} Clk_xbar {Auto} Master {/processing_system7_0/M_AXI_GP0} Slave {/Upsampling_IP_0/s_axi} ddr_seg {Auto} intc_ip {New AXI Interconnect} master_apm {0}}  [get_bd_intf_pins Upsampling_IP_0/s_axi]
-#endgroup
-
-#add 512 buffer to AXI_Interconnect
-#startgroup
-#set_property -dict [list CONFIG.S00_HAS_DATA_FIFO {2}] [get_bd_cells axi_mem_intercon]
-#endgroup
-
 #validating design
 validate_bd_design
 #regenerate design
@@ -584,8 +564,7 @@ regenerate_bd_layout
 save_bd_design
 #Creating hdl wrapper
 
-# End of cr_bd_Upsampling_blockdesign()
-#cr_bd_Upsampling_blockdesign ""
+# End of blockdesign
 set_property REGISTERED_WITH_MANAGER "1" [get_files Upsampling_blockdesign.bd ] 
 set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files Upsampling_blockdesign.bd ] 
 
@@ -597,8 +576,6 @@ if { [get_property IS_LOCKED [ get_files -norecurse Upsampling_blockdesign.bd] ]
   add_files -norecurse -fileset sources_1 $wrapper_path
 }
 
-#make_wrapper -files [get_files $resultDir/Upsampling_blockdesign.srcs/sources_1/bd/Upsampling_blockdesign/Upsampling_blockdesign.bd] -top
-#add_files -norecurse $resultDir/Upsampling_blockdesign.gen/sources_1/bd/Upsampling_blockdesign/hdl/Upsampling_blockdesign_wrapper.vhd
 #running synthesis and implementation		
 set num_of_jobs [get_param general.maxthreads]
 launch_runs impl_1 -to_step write_bitstream -jobs 4
