@@ -15,6 +15,7 @@ typedef struct layer_block
     bool relu;
     std :: string path;
     std :: string bias_path;
+    int conv_num;
 
 } layer_block;
 
@@ -45,6 +46,7 @@ void LoadModelDescription(std :: string path, std :: vector <layer_block> &desc)
         lb.c = stoi(line_seg[3]);
         lb.path = line_seg[5];
         lb.bias_path = line_seg[6];
+        lb.conv_num = stoi(line_seg[8]);
         if(line_seg[4] == "True")
             lb.save = true;
         else
@@ -79,6 +81,14 @@ int main()
     std :: cout << "Ucitan je ulaz iz datoteke " << desc[0].path << std :: endl;
     desc.erase(desc.begin());
 
+    /**/
+    /*
+    // OTKOMENTARISI ME!!
+    // Dodajemo nule kako bi bio odgovarajucih dimenzija za prvu konvoluciju
+    zero_padding_input(IFM);
+    std :: cout << "Dodate su nule na ulaz " <<  std :: endl;
+    */
+    /**/
 
     // prikaz opisa svakog sloja
     for(int i = 0; i < (int)desc.size(); i++)
@@ -90,6 +100,7 @@ int main()
         std :: cout << desc[i].save << " ";
         std :: cout << desc[i].path << " ";
         std :: cout << desc[i].bias_path << " ";
+        std :: cout << desc[i].conv_num << " ";
         std :: cout << std :: endl;
     }
 
@@ -137,6 +148,121 @@ int main()
 
                 std :: cout << "Konvolucija! ";
                 {
+                    /* ------------------------------------------ */
+
+                    /**/
+                    /*
+
+                    // OTKOMENTARISI ME!!
+
+                    if(desc[i].conv_num == 34 || desc[i].conv_num == 35)
+                    {
+                        float3D IFM_new(desc[0].x, std :: vector <std :: vector <t>> (desc[0].y, std :: vector <t> (256)));
+                        float3D IFM_temp(desc[0].x, std :: vector <std :: vector <t>> (desc[0].y, std :: vector <t> (64)));
+                        std::string temp;
+
+                        temp = desc[i].path;
+                        temp.erase(temp.lenght() - 4);
+                        temp += "_1_py.txt";
+                        IFM_temp = IFM; // cuvamo originalni ulaz
+                        convlove(IFM, temp, desc[i].conv_num, desc[i].relu); // treba putanju da podesim
+                        // Upisemo deo rezultata ovde
+                        // IFM je uvek istih dimenzija
+                        for(int x = 0; x < (int)(IFM.size()); x++)
+                        {
+                            for(int y = 0; y < (int)(IFM[0].size()); y++)
+                            {
+                                for(int c = 0; c < (int)IFM[0][0].size(); c++)
+                                {
+                                    IFM_new[x][y][c] = IFM[x][y][z];
+                                }
+                            }
+                        }
+
+                        temp = desc[i].path;
+                        temp.erase(temp.lenght() - 4);
+                        temp += "_2_py.txt";
+                        IFM = IFM_temp;
+                        convlove(IFM_temp, temp, desc[i].conv_num + 1, desc[i].relu); // treba putanju da podesim
+                        // Upisemo deo rezultata ovde
+                        // IFM je uvek istih dimenzija
+                        for(int x = 0; x < (int)(IFM.size()); x++)
+                        {
+                            for(int y = 0; y < (int)(IFM[0].size()); y++)
+                            {
+                                for(int c = 0; c < (int)IFM[0][0].size(); c++)
+                                {
+                                    IFM_new[x][y][c] = IFM[x][y][z + 64];
+                                }
+                            }
+                        }
+
+                        temp = desc[i].path;
+                        temp.erase(temp.lenght() - 4);
+                        temp += "_3_py.txt";
+                        IFM = IFM_temp;
+                        convlove(IFM, temp, desc[i].conv_num + 2, desc[i].relu); // treba putanju da podesim
+                        // Upisemo deo rezultata ovde
+                        // IFM je uvek istih dimenzija
+                        for(int x = 0; x < (int)(IFM.size()); x++)
+                        {
+                            for(int y = 0; y < (int)(IFM[0].size()); y++)
+                            {
+                                for(int c = 0; c < (int)IFM[0][0].size(); c++)
+                                {
+                                    IFM_new[x][y][c] = IFM[x][y][z + 2 * 64];
+                                }
+                            }
+                        }
+
+                        temp = desc[i].path;
+                        temp.erase(temp.lenght() - 4);
+                        temp += "_4_py.txt";
+                        IFM = IFM_temp;
+                        convlove(IFM, temp, desc[i].conv_num + 3, desc[i].relu); // treba putanju da podesim
+                        // Upisemo deo rezultata ovde
+                        // IFM je uvek istih dimenzija
+                        for(int x = 0; x < (int)(IFM.size()); x++)
+                        {
+                            for(int y = 0; y < (int)(IFM[0].size()); y++)
+                            {
+                                for(int c = 0; c < (int)IFM[0][0].size(); c++)
+                                {
+                                    IFM_new[x][y][c] = IFM[x][y][z + 3 * 64];
+                                }
+                            }
+                        }
+
+                    }
+                    else
+                    {
+                        if(desc[i].conv_num != 36)
+                            convlove(IFM, desc[i].path, desc[i].conv_num, desc[i].relu);
+                        else // else deo je za poslednji sloj, on ide klasicno
+                        {
+                            float4D W(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));
+                            std :: vector <t> b(desc[i].c); // bias deo
+                            LoadFile(desc[i].path, W); // ucitavanje tezina za taj sloj
+                            if(use_bias)
+                                LoadBias(desc[i].bias_path, b);
+                            Conv2D(W, IFM, b, use_bias, desc[i].relu);
+
+                            W.clear(); // brisem za svaki slucaj ceo vector
+                            b.clear();
+
+                        }
+                    }
+
+                    if(desc[i].save)
+                    {
+                        output_stack.push(IFM);
+                        output_stack.push(IFM);
+                    }
+                    */
+                    /**/
+
+                    /* ------------------------------------------ */
+
 
                     // prvi put kad se dodaje u stack, onda mora dupli
                     float4D W(desc[i].c, float3D(3, std :: vector<std :: vector<t>>(3, std :: vector<t>(desc[i - 1].c))));

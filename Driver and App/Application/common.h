@@ -10,6 +10,9 @@
 #include <fstream>
 #include <string>
 #include <sstream>
+/**/
+/* Treba dodati onu biblioteku za rad sa 64-bitnim int brojevima */
+/**/
 
 #define DP 11
 #define MAC_WIDTH 32
@@ -18,8 +21,8 @@
 #define DATA_WIDTH 16
 
 typedef double t;
-typedef unsigned long long int dram_word;
-typedef long long int sint64;
+typedef unsigned long long int dram_word; /**//* Zameni unsigned long long int sa uint64_t *//**/
+typedef long long int sint64;             /**//* Zameni long long int sa int64_t *//**/
 typedef std :: vector < std :: vector < std :: vector <t>>> float3D;
 typedef std :: vector < std :: vector < std :: vector < std :: vector <t>>>> float4D;
 const std :: vector <t> mean = {114.44399999999999, 111.4605, 103.02000000000001};
@@ -28,7 +31,7 @@ const std :: vector <t> mean = {114.44399999999999, 111.4605, 103.02000000000001
 // kakav pointer vraca drajver? Verovatno unsigned char
 void Write_DRAM_content(std::vector <dram_word> &data, std::vector <dram_word> &weights, dram_word* dram);
 // Konvertujemo fixed point u float
-t Fxp2Float(dram_word *data);
+t Fxp2Float(dram_word *data); // Ovo treba proveriti
 // Konvertujemo float u fixed point
 dram_word Float2Fxp(t &data, int n, int f); // proveriti ovu funkciju!
 // Formatiramo podatke kako bi ih IP razumeo i kvantizujemo ih
