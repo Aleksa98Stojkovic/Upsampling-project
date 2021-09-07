@@ -152,7 +152,7 @@ void formatDataIP(float3D &data, dram_word* data_ip)
     float3D new_data(height, vector <vector <t>> (width, vector <t> (depth)));
 
     // pokazivac na pocetak izlaza
-    dram_word* start_out;
+    unsigned int* start_out;
     start_out = data_ip;
     start_out += (unsigned int)data.size() * (unsigned int)data[0].size() * (unsigned int)data[0][0].size() / 4 + 9 * 64 * 64 / 4;
 
@@ -329,10 +329,10 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
 
     val = layer_num * 64;
     temp = 12;
-    val |= ((width + 2) * (height + 2)) << temp;
+    val |= ((width - 2) * (height - 2)) << temp;
     write_driver(driver_path, 4, val);      // config4
 
-    val = width + 2;
+    val = width - 2;
     write_driver(driver_path, 5, val);      // config5
 
     write_driver(driver_path, 7, base);     // config7
@@ -357,5 +357,9 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
 
     // Cekamo da se zavrsi obrada podataka
     while(read_driver(driver_path, false) == 2);
+
+    // Formatira izlaze
+    data_i.clear();
+    formatDataIP(data_i, dram + (height * width * depth / 4 + 3 * 3 * 64 * 16) * 8);
 
 }
