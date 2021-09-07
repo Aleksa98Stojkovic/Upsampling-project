@@ -47,7 +47,7 @@ entity IP_with_router_top is
         SIGNED_UNSIGNED : string  := "signed";
         MAC_width       : natural := 32;
         bias_base_addr_width : natural := 12; 
-        bias_size       : natural := 64*38;
+        bias_size       : natural := 64*43;
         
         -------------------------- Cache module --------------------------
         col_width        : natural := 9;
