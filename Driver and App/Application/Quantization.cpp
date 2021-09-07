@@ -113,23 +113,33 @@ void formatData(vector <dram_word> &data_o, float3D &data_i)
 void formatWeight(vector <dram_word> &weight_o, string path)
 {
     weight_o.clear();
+    int mask = 0x0000ffff;
+    dram_word data_item;
+
     ifstream file;
+    vector <sint64> numbers;
+    string line;
     file.open(path);
-
-    if(file.fail())
+    while(getline(file, line))
     {
-        cerr << "Greska prilikom otvaranja fajla!" << endl;
-        exit(1);
-    }
+        stringstream sline(line);
 
-    while(!file.eof())
-    {
-        dram_word temp;
-        file >> temp;
-        weight_o.push_back(temp);
-    }
+        while(sline.good())
+        {
+            string str;
+            getline(sline, str, ',');
+            if(numbers.size() < 4)
+                numbers.push_back(stoi(str));
+        }
 
-    file.close();
+        data_item = 0;
+        for(int i = 0; i < 4; i++)
+            data_item |= (mask & numbers[i]) << ((3 - i) * 16);
+
+        weight_o.push_back(data_item);
+        numbers.clear();
+
+    }
 }
 
 void formatDataIP(float3D &data, dram_word* data_ip)
@@ -192,4 +202,160 @@ void zero_padding(float3D &data)
             }
         }
     }
+
+    data.clear();
+    data = new_data;
+    new_data.clear();
+}
+
+void zero_padding_input(float3D &data)
+{
+    int height = (int)data.size();
+    int width = (int)data[0].size();
+    int depth = 64;
+    float3D new_data(height, vector <vector <t>> (width, vector <t> (depth)));
+
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            for(int c = 0; c < depth; c++)
+            {
+                new_data[x][y][c] = 0;
+            }
+        }
+    }
+
+    for(int x = 0; x < width; x++)
+    {
+        for(int y = 0; y < height; y++)
+        {
+            for(int c = 0; c < 3; c++)
+            {
+                new_data[x][y][c] = data[x][y][c];
+            }
+        }
+    }
+
+    data.clear();
+    data = new_data;
+    new_data.clear();
+}
+
+void write_driver(string path, int reg_num, int val)
+{
+        string write_item = to_string(reg_num) + "," + to_string(val);
+
+        ofstream file;
+        file.open(path);
+        if(file.fail())
+        {
+            cerr << "Greska prilikom upisivanja!" << endl;
+            exit(1);
+        }
+
+        file << write_item;
+
+        file.close();
+}
+
+int read_driver(string path, bool read_pointer)
+{
+    string read_item;
+
+    ifstream file;
+    file.open(path);
+    if(file.fail())
+    {
+        cerr << "Greska prilikom citanja!" << endl;
+        exit(1);
+    }
+
+    file >> read_item;
+
+    file.close();
+
+    string pointer, reg;
+    int len = 0;
+
+    for(int i = 0; i < (int)read_item.length(); i++)
+    {
+        len++;
+
+        if(read_item[i] == ',')
+        {
+            pointer = read_item.substr(0, len - 1);
+            reg = &read_item[i + 1];
+            break;
+        }
+    }
+
+    if(read_pointer)
+        return stoi(pointer);
+    else
+        return stoi(reg);
+}
+
+void convlove(float3D &data_i, string w_path, int layer_num, int relu)
+{
+    string driver_path = "/dev/upsampling";
+
+    // Procitaj pokazivac
+    dram_word* dram = (dram_word*)(read_driver(driver_path, true));
+    // Dodaj nule oko ulaza
+    zero_padding(data_i);
+    // Citamo i formatiramo tezine
+    vector<dram_word> weights;
+    formatWeight(weights, w_path);
+    // Formatiramo ulaze
+    vector<dram_word> data;
+    formatData(data, data_i);
+    // Upis podataka u blok memorije u DDR-u
+    Write_DRAM_content(data, weights, dram);
+
+    // Upis u registre
+    int base = (read_driver(driver_path, true));
+    int height = (int)data_i.size();
+    int width = (int)data_i[0].size();
+    int depth = (int)data_i[0][0].size();
+    int val;
+    int temp;
+
+    val = base + (height * width * depth / 4) * 8;
+    write_driver(driver_path, 1, val);      // config1
+
+    val = base + (height * width * depth / 4 + 3 * 3 * 64 * 16) * 8;
+    write_driver(driver_path, 2, val);      // config2
+
+    val = layer_num * 64;
+    temp = 12;
+    val |= ((width + 2) * (height + 2)) << temp;
+    write_driver(driver_path, 4, val);      // config4
+
+    val = width + 2;
+    write_driver(driver_path, 5, val);      // config5
+
+    write_driver(driver_path, 7, base);     // config7
+
+    val = 0;                                // sel
+    val |= relu << 1;                       // relu
+    val |= 1 << 3;                          // wmem_start
+    val |= height << 5;                     // height
+    val |= (height * width) << 14;          // total
+    write_driver(driver_path, 3, val);      // config3
+
+    // Cekamo da se memorija popuni
+    while(read_driver(driver_path, false) == 1);
+
+    val = 1;                                // sel
+    val |= relu << 1;                       // relu
+    val |= 0 << 3;                          // wmem_start
+    val |= 1 << 4;                          // cache_start
+    val |= height << 5;                     // height
+    val |= (height * width) << 14;          // total
+    write_driver(driver_path, 3, val);      // config3
+
+    // Cekamo da se zavrsi obrada podataka
+    while(read_driver(driver_path, false) == 2);
+
 }
