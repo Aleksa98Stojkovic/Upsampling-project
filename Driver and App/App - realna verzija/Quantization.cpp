@@ -329,14 +329,17 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
     val = width - 2;
     write_driver(driver_path, 5, val);      // config5
 
-    write_driver(driver_path, 7, base);     // config7
-
     val = 0;                                // sel
     val |= relu << 1;                       // relu
-    val |= 1 << 3;                          // wmem_start
+    val |= 0 << 3;                          // wmem_start
     val |= height << 5;                     // height
     val |= (height * width) << 14;          // total
     write_driver(driver_path, 3, val);      // config3
+	
+	write_driver(driver_path, -1, 0);       // Rezervacija memorije
+	
+	val |= 1 << 3;							// Pokrecemo popunjavanje memorije
+	write_driver(driver_path, 3, val);      // config3
 
     // Cekamo da se memorija popuni
     while(read_driver(driver_path, false) == 1);
@@ -355,5 +358,6 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
     // Formatira izlaze
     data_i.clear();
     formatDataIP(data_i, dram + (height * width * depth / 4 + 3 * 3 * 64 * 16) * 8);
-
+	
+	write_driver(driver_path, -1, 1);       // Oslobadjanje memorije
 }
