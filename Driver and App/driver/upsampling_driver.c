@@ -19,7 +19,7 @@
 
 #define DRIVER_NAME "upsampling_driver"
 #define DEVICE_NAME "upsampling"
-#define BUFF_SIZE 40
+#define BUFF_SIZE 50
 
 MODULE_AUTHOR ("LARB");
 MODULE_DESCRIPTION("Driver for Upsampling IP.");
@@ -60,13 +60,12 @@ struct file_operations my_fops =
 	.open = upsampling_open,
 	.read = upsampling_read,
 	.write = upsampling_write,
-	.release = upsampling_close,
-	.mmap = upsampling_mmap
+	.release = upsampling_close
 };
 
 static struct of_device_id upsampling_of_match[] = {					
 	{ .compatible = "", },									// <-------- dodati kad se napravi device_tree u Petalinux
-	{ /* end of list */ },
+	{ /* end of list */ }
 };
 
 static struct platform_driver upsampling_driver = {
@@ -79,10 +78,6 @@ static struct platform_driver upsampling_driver = {
 	.remove	= upsampling_remove,
 };
 
-static struct vm_area_struct vma = {
-		
-	
-};
 
 MODULE_DEVICE_TABLE(of, upsampling_of_match);
 
@@ -183,7 +178,7 @@ ssize_t upsampling_read(struct file *pfile, char __user *buffer, size_t length, 
 	config6 = ioread32(upp->base_addr + 20);
 	
 	len = scnprintf(buff, BUFF_SIZE, "%u,%d", base_v, config6);
-	ret = copy_to_user(buf, buff, len);
+	ret = copy_to_user(buffer, buff, len);
 	
 	printk(KERN_INFO "Driver sending:%s\n", buff);
 	
@@ -235,7 +230,7 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 				base_p = (u32 *)kmalloc(sizeof(u64)*size, GFP_KERNEL);
 				base_v = ioremap(base_p, total*16 + 9*64*16 + num_of_pix*64);
 				
-				iowrite32(*base_p, upp->base_addr + 24);
+				iowrite32(base_p, upp->base_addr + 24);
 			}
 			else
 			{
