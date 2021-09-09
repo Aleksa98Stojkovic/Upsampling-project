@@ -15,9 +15,10 @@
 #include <linux/platform_device.h>//platform driver
 #include <linux/of.h>//of match table
 #include <linux/ioport.h>//ioremap
+#include <mm_types.h>//for memory mapping
 
 #define DRIVER_NAME "upsampling_driver"
-#define DEVICE_NAME "upsampling"		// <-------- proveriti nakon Petalinux da li ce biti isto "upsampling"
+#define DEVICE_NAME "upsampling"
 #define BUFF_SIZE 40
 
 MODULE_AUTHOR ("LARB");
@@ -32,6 +33,9 @@ static struct device *my_device;
 static struct cdev *my_cdev;
 static struct upsampling_info *upp = NULL;
 
+int total, num_of_pix;
+u32 *base_p;
+u32 *base_v;
 
 struct upsampling_info {
 	unsigned long mem_start;
@@ -57,6 +61,7 @@ struct file_operations my_fops =
 	.read = upsampling_read,
 	.write = upsampling_write,
 	.release = upsampling_close,
+	.mmap = upsampling_mmap
 };
 
 static struct of_device_id upsampling_of_match[] = {					
@@ -72,6 +77,11 @@ static struct platform_driver upsampling_driver = {
 	},
 	.probe	= upsampling_probe,
 	.remove	= upsampling_remove,
+};
+
+static struct vm_area_struct vma = {
+		
+	
 };
 
 MODULE_DEVICE_TABLE(of, upsampling_of_match);
@@ -97,7 +107,7 @@ static int upsampling_probe(struct platform_device *pdev)
 	upp = (struct upsampling_info *) kmalloc(sizeof(struct upsampling_info), GFP_KERNEL);
 	if (!upp) 
 	{
-		printk(KERN_ALERT "Could not allocate upsampling device\n");
+		printk(KERN_ALERT "Could not allocate memory for upsampling device\n");
 		return -ENOMEM;
 	}
 	
@@ -166,15 +176,13 @@ ssize_t upsampling_read(struct file *pfile, char __user *buffer, size_t length, 
 {
 	int ret;
 	int len;
-	u32 base;
 	int	config6;
 	char buff[BUFF_SIZE];
 	
 	printk(KERN_INFO "Driver is reading...\n");
-	base = (u32)(upp->base_addr);
 	config6 = ioread32(upp->base_addr + 20);
 	
-	len = scnprintf(buff, BUFF_SIZE, "%u,%d", base, config6);
+	len = scnprintf(buff, BUFF_SIZE, "%u,%d", base_v, config6);
 	ret = copy_to_user(buf, buff, len);
 	
 	printk(KERN_INFO "Driver sending:%s\n", buff);
@@ -219,6 +227,24 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 	
 	switch(reg_num)
 	{
+		case -1 :
+		
+			if(reg_value == 0)
+			{
+				int size = total*16 + 9*64*16 + num_of_pix*64;
+				base_p = (u32 *)kmalloc(sizeof(u64)*size, GFP_KERNEL);
+				base_v = ioremap(base_p, total*16 + 9*64*16 + num_of_pix*64);
+				
+				iowrite32(*base_p, upp->base_addr + 24);
+			}
+			else
+			{
+				release_mem_region(base_p, total*16 + 9*64*16 + num_of_pix*64);
+				kfree(base_p);
+			}
+		
+			break;
+		
 		case 1 :
 		
 			printk(KERN_INFO "Writing to config1...\n");
@@ -239,6 +265,8 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 			
 		case 3 :
 		
+			total = reg_value >> 14;
+		
 			printk(KERN_INFO "Writing to config3...\n");
 			iowrite32(reg_value, upp->base_addr + 8);
 		
@@ -247,6 +275,8 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 			break;
 			
 		case 4 :
+		
+			num_of_pix = reg_value >> 12;
 		
 			printk(KERN_INFO "Writing to config4...\n");
 			iowrite32(reg_value, upp->base_addr + 12);
@@ -264,15 +294,6 @@ ssize_t upsampling_write(struct file *pfile, const char __user *buffer, size_t l
 		
 			break;
 			
-		case 7 :
-		
-			printk(KERN_INFO "Writing to config7...\n");
-			iowrite32(reg_value, upp->base_addr + 24);
-		
-			printk(KERN_INFO "Finished writing to config7\n");
-		
-			break;
-		
 		default :
 			
 			printk(KERN_ERR "Wrong register config number\n");
