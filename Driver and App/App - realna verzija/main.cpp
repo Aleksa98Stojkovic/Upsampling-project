@@ -5,6 +5,15 @@
 #include "Pixel_Shuffle.h"
 #include "common.h"
 
+// OpenCV biblioteka
+#include <opencv2/core.hpp> 		// Osnove same biblioteke
+#include <opencv2/imgcodecs.hpp>	// Citanje i pisanje slika
+#include <opencv2/highgui.hpp>		// Prikaz slike
+// Napomena: treba dodati u makefile opencv biblioteku
+
+
+using namespace cv;
+
 typedef struct layer_block
 {
     int layer_id;
@@ -265,8 +274,33 @@ int main()
 
         std :: cout << "Odradjen je " << ++counter << ". sloj, " << "Stak ima " << output_stack.size() << " elemenata" << std :: endl;
     }
-
-    WriteFile("result.txt", IFM);
+	
+	int height_o = (int)IFM.size();
+	int width_o = (int)IFM[0].size();
+	// Napravice novi Mat objekat pun nula
+	Mat output = Mat::ones(height_o, width_o, CV_8UC3); // CV_8UC3 -> 8 znaci osam bita po pikselu, U = unisgned, C3 = tri kanala
+	
+	unsigned char pixel;
+	
+	for(int x = 0; x < height_o; x++)
+	{
+		for(int y = 0; y < width_o; y++)
+		{
+			for(int c = 0; c < 3; c++)
+			{
+				if(IFM[x][y][c] < 0) IFM[x][y][c] = 0.0;
+				if(IFM[x][y][c] > 255) IFM[x][y][c] = 255.0;
+				
+				pixel = (unsigned char)IFM[x][y][c];
+				output.at<unsigned char>(x, y, c) = pixel; // Ovo treba jos proveriti
+				
+			}
+		}	
+	}
+	
+	// Upisujemo sliku
+	imwrite("result.png", output);
+    // WriteFile("result.txt", IFM);
     std :: cout << "Upisan rezultat" << std :: endl;
 
     IFM.clear();
