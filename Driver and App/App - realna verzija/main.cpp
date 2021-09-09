@@ -11,7 +11,6 @@
 #include <opencv2/highgui.hpp>		// Prikaz slike
 // Napomena: treba dodati u makefile opencv biblioteku
 
-
 using namespace cv;
 
 typedef struct layer_block
