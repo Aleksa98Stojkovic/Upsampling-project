@@ -18,7 +18,6 @@
 
 #define DRIVER_NAME "upsampling_driver"
 #define DEVICE_NAME "upsampling"		// <-------- proveriti nakon Petalinux da li ce biti isto "upsampling"
-#define CONFIG_BASE_ADDRESS 0x43c00000
 #define BUFF_SIZE 40
 
 MODULE_AUTHOR ("LARB");
@@ -167,15 +166,15 @@ ssize_t upsampling_read(struct file *pfile, char __user *buffer, size_t length, 
 {
 	int ret;
 	int len;
-	int base;
+	u32 base;
 	int	config6;
 	char buff[BUFF_SIZE];
 	
 	printk(KERN_INFO "Driver is reading...\n");
-	base = ioread32(upp->base_addr);
-	config6 = ioread32(upp->base_addr + CONFIG_BASE_ADDRESS + 20);
+	base = (u32)(upp->base_addr);
+	config6 = ioread32(upp->base_addr + 20);
 	
-	len = scnprintf(buff, BUFF_SIZE, "%d,%d", base, config6);
+	len = scnprintf(buff, BUFF_SIZE, "%u,%d", base, config6);
 	ret = copy_to_user(buf, buff, len);
 	
 	printk(KERN_INFO "Driver sending:%s\n", buff);
