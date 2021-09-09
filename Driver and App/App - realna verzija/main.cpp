@@ -168,7 +168,7 @@ int main()
 						bias_address += desc[i].conv_num;
 						
                         temp = desc[i].path;
-                        temp.erase(temp.lenght() - 4);
+                        temp.erase(temp.length() - 4);
                         temp += "_1.txt"; 
                         IFM_temp = IFM; // cuvamo originalni ulaz
                         convlove(IFM, temp, bias_address, desc[i].relu); // treba putanju da podesim
@@ -186,7 +186,7 @@ int main()
                         }
 
                         temp = desc[i].path;
-                        temp.erase(temp.lenght() - 4);
+                        temp.erase(temp.length() - 4);
                         temp += "_2.txt";
                         IFM = IFM_temp;
                         convlove(IFM, temp, bias_address + 1, desc[i].relu); // treba putanju da podesim
@@ -198,7 +198,7 @@ int main()
                             {
                                 for(int c = 0; c < (int)IFM[0][0].size(); c++)
                                 {
-                                    IFM_new[x][y][c] = IFM[x][y][z + 64];
+                                    IFM_new[x][y][c + 64] = IFM[x][y][z];
                                 }
                             }
                         }
@@ -216,7 +216,7 @@ int main()
                             {
                                 for(int c = 0; c < (int)IFM[0][0].size(); c++)
                                 {
-                                    IFM_new[x][y][c] = IFM[x][y][z + 2 * 64];
+                                    IFM_new[x][y][c + 2 * 64] = IFM[x][y][z];
                                 }
                             }
                         }
@@ -234,7 +234,7 @@ int main()
                             {
                                 for(int c = 0; c < (int)IFM[0][0].size(); c++)
                                 {
-                                    IFM_new[x][y][c] = IFM[x][y][z + 3 * 64];
+                                    IFM_new[x][y][c + 3 * 64] = IFM[x][y][z];
                                 }
                             }
                         }
@@ -277,7 +277,7 @@ int main()
 	int height_o = (int)IFM.size();
 	int width_o = (int)IFM[0].size();
 	// Napravice novi Mat objekat pun nula
-	Mat output = Mat::ones(height_o, width_o, CV_8UC3); // CV_8UC3 -> 8 znaci osam bita po pikselu, U = unisgned, C3 = tri kanala
+	Mat output = Mat::zeros(height_o, width_o, CV_8UC3); // CV_8UC3 -> 8 znaci osam bita po pikselu, U = unisgned, C3 = tri kanala
 	
 	unsigned char pixel;
 	

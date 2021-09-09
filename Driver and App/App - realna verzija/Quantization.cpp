@@ -294,8 +294,6 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
 {
     string driver_path = "/dev/upsampling";
 
-    // Procitaj pokazivac
-    dram_word* dram = (dram_word*)(read_driver(driver_path, true));
     // Dodaj nule oko ulaza
     zero_padding(data_i);
     // Citamo i formatiramo tezine
@@ -304,22 +302,14 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
     // Formatiramo ulaze
     vector<dram_word> data;
     formatData(data, data_i);
-    // Upis podataka u blok memorije u DDR-u
-    Write_DRAM_content(data, weights, dram);
+
 
     // Upis u registre
-    int base = (read_driver(driver_path, true));
     int height = (int)data_i.size();
     int width = (int)data_i[0].size();
     int depth = (int)data_i[0][0].size();
     int val;
     int temp;
-
-    val = base + (height * width * depth / 4) * 8;
-    write_driver(driver_path, 1, val);      // config1
-
-    val = base + (height * width * depth / 4 + 3 * 3 * 64 * 16) * 8;
-    write_driver(driver_path, 2, val);      // config2
 
     val = layer_num * 64;
     temp = 12;
@@ -331,18 +321,31 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
 
     val = 0;                                // sel
     val |= relu << 1;                       // relu
-    val |= 0 << 3;                          // wmem_start
     val |= height << 5;                     // height
     val |= (height * width) << 14;          // total
     write_driver(driver_path, 3, val);      // config3
 	
 	write_driver(driver_path, -1, 0);       // Rezervacija memorije
 	
+	// Procitaj pokazivac
+    dram_word* dram = (dram_word*)(read_driver(driver_path, true));
+	
+	// Upis podataka u blok memorije u DDR-u
+    Write_DRAM_content(data, weights, dram);
+	
+	int base = (read_driver(driver_path, true));
+	
+	val = base + (height * width * depth / 4) * 8;
+    write_driver(driver_path, 1, val);      // config1
+
+    val = base + (height * width * depth / 4 + 3 * 3 * 64 * 16) * 8;
+    write_driver(driver_path, 2, val);      // config2
+	
 	val |= 1 << 3;							// Pokrecemo popunjavanje memorije
 	write_driver(driver_path, 3, val);      // config3
 
     // Cekamo da se memorija popuni
-    while(read_driver(driver_path, false) == 1);
+    while(read_driver(driver_path, false) == 1); // 00, 01, 10, 11
 
     val = 1;                                // sel
     val |= relu << 1;                       // relu
@@ -353,7 +356,7 @@ void convlove(float3D &data_i, string w_path, int layer_num, int relu)
     write_driver(driver_path, 3, val);      // config3
 
     // Cekamo da se zavrsi obrada podataka
-    while(read_driver(driver_path, false) == 2);
+    while(read_driver(driver_path, false) == 3);
 
     // Formatira izlaze
     data_i.clear();
