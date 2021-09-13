@@ -19,17 +19,13 @@ file mkdir $resultDir
 
 # CONNECT SYSTEM	
 create_project Upsampling_blockdesign $resultDir  -part xc7z010clg400-1 -force
-set_property board_part digilentinc.com:zybo:part0:1.0 [current_project]
+set_property board_part digilentinc.com:zybo-z7-10:part0:1.0 [current_project]
 set_property target_language VHDL [current_project]
 create_bd_design "Upsampling_blockdesign"
 update_compile_order -fileset sources_1
 #add ip-s to main repo
 set_property  ip_repo_paths  $ip_repo_path [current_project]
 update_ip_catalog
-#add and configure zynq
-#startgroup
-#create_bd_cell -type ip -vlnv xilinx.com:ip:processing_system7:5.5 processing_system7_0
-#endgroup
 
 # Create interface ports
   set DDR [ create_bd_intf_port -mode Master -vlnv xilinx.com:interface:ddrx_rtl:1.0 DDR ]
@@ -556,6 +552,7 @@ Reset#SD 0#UART 1#UART 1#GPIO#GPIO#Enet 0#Enet 0}\
   assign_bd_address -offset 0x00000000 -range 0x40000000 -target_address_space [get_bd_addr_spaces Upsampling_IP_0/m_axi] [get_bd_addr_segs processing_system7_0/S_AXI_HP0/HP0_DDR_LOWOCM] -force
   assign_bd_address -offset 0x43C00000 -range 0x00010000 -target_address_space [get_bd_addr_spaces processing_system7_0/Data] [get_bd_addr_segs Upsampling_IP_0/s_axi/reg0] -force
 
+
 #validating design
 validate_bd_design
 #regenerate design
@@ -564,7 +561,6 @@ regenerate_bd_layout
 save_bd_design
 #Creating hdl wrapper
 
-# End of blockdesign
 set_property REGISTERED_WITH_MANAGER "1" [get_files Upsampling_blockdesign.bd ] 
 set_property SYNTH_CHECKPOINT_MODE "Hierarchical" [get_files Upsampling_blockdesign.bd ] 
 
