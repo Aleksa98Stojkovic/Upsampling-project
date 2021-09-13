@@ -366,8 +366,6 @@ begin
                         
                         if(comp5 = '1') then
                             
-                            axi_read_rdy_o <= '0';
-                            
                             -- Determine the right amount of lives
                             write_RF_o <= '1';
                             -- Incrementing couter_4
