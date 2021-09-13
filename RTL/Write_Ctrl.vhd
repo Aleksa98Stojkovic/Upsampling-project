@@ -122,6 +122,7 @@ signal valid : std_logic;
 begin
 
 comp5 <= '1' when counter_16 = "1111" else '0';
+comp5_o <= comp5;
 
 -- Assigments --
 axi_read_address_o <= DDR_addr_reg;
